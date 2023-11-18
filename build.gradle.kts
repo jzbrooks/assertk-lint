@@ -6,12 +6,18 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.androidLint) apply false
     alias(libs.plugins.spotless) apply false
-    alias(libs.plugins.com.android.library) apply false
-    alias(libs.plugins.org.jetbrains.kotlin.android) apply false
+    alias(libs.plugins.changelog)
 }
 
 allprojects {
     pluginManager.apply(SpotlessPlugin::class)
+
+    configure<SpotlessExtension> {
+        kotlinGradle {
+            ktlint("1.0.1")
+            target("**/*.kts")
+        }
+    }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         configure<KotlinJvmProjectExtension> {
@@ -20,9 +26,6 @@ allprojects {
 
         configure<SpotlessExtension> {
             kotlin {
-                ktlint("1.0.1")
-            }
-            kotlinGradle {
                 ktlint("1.0.1")
             }
         }
