@@ -32,5 +32,4 @@ allprojects {
     }
 }
 
-private val VERSION_NAME by properties
-version = VERSION_NAME.toString()
+version = property("VERSION_NAME").toString()
