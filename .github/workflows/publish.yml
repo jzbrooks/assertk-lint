@@ -37,7 +37,7 @@ jobs:
                        -PsigningInMemoryKey="${{ secrets.SIGNING_KEY_SECRET }}" \
                        -PsigningInMemoryKeyPassword="${{ secrets.SIGNING_KEY_PASSWORD }}" \
                        -PmavenCentralUsername="${{ secrets.OSSRH_USERNAME }}" \
-                       -PmavenCentralPassword="${{ secrets.OSSRH_PSSWORD }}" \
+                       -PmavenCentralPassword="${{ secrets.OSSRH_PASSWORD }}" \
                        publish
 
       - name: Create Pull Request
