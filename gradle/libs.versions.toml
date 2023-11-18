@@ -1,0 +1,39 @@
+[versions]
+kotlin = "1.9.20"
+agp = "8.1.4"
+androidLint = "31.1.4" # agp + 23.0.0
+junit = "4.13.2"
+spotless = "6.22.0"
+org-jetbrains-kotlin-android = "1.9.20"
+runner = "1.0.2"
+espresso-core = "3.0.2"
+appcompat-v7 = "28.0.0"
+
+[libraries]
+androidLintApi = { group = "com.android.tools.lint", name = "lint-api", version.ref = "androidLint" }
+androidLintChecks = { group = "com.android.tools.lint", name = "lint-checks", version.ref = "androidLint" }
+androidLintCli = { group = "com.android.tools.lint", name = "lint", version.ref = "androidLint" }
+androidLintTests = { group = "com.android.tools.lint", name = "lint-tests", version.ref = "androidLint" }
+junit = { group = "junit", name = "junit", version.ref  = "junit" }
+kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+runner = { group = "com.android.support.test", name = "runner", version.ref = "runner" }
+espresso-core = { group = "com.android.support.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompat-v7" }
+
+[bundles]
+lint-api = [
+    "kotlinStdlib",
+    "androidLintApi",
+]
+lint-tests = [
+    "junit",
+    "androidLintCli",
+    "androidLintTests"
+]
+
+[plugins]
+androidLint = { id = "com.android.lint", version.ref = "agp" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+com-android-library = { id = "com.android.library", version.ref = "agp" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
