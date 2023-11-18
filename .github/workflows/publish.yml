@@ -34,10 +34,10 @@ jobs:
 
       - name: Publish to MavenCentral
         run: ./gradlew --no-configuration-cache \
-                       -PsigningInMemoryKey=${{ secrets.SIGNING_KEY_SECRET }} \
-                       -PsigningInMemoryKeyPassword=${{ secrets.SIGNING_KEY_PASSWORD }} \
-                       -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} \
-                       -PmavenCentralPassword=${{ secrets.OSSRH_PSSWORD }} \
+                       -PsigningInMemoryKey="${{ secrets.SIGNING_KEY_SECRET }}" \
+                       -PsigningInMemoryKeyPassword="${{ secrets.SIGNING_KEY_PASSWORD }}" \
+                       -PmavenCentralUsername="${{ secrets.OSSRH_USERNAME }}" \
+                       -PmavenCentralPassword="${{ secrets.OSSRH_PSSWORD }}" \
                        publish
 
       - name: Create Pull Request
