@@ -34,11 +34,19 @@ jobs:
 
       - name: Publish to MavenCentral
         run: ./gradlew --no-configuration-cache \
-                       -PsigningInMemoryKey="${{ secrets.SIGNING_KEY_SECRET }}" \
-                       -PsigningInMemoryKeyPassword="${{ secrets.SIGNING_KEY_PASSWORD }}" \
-                       -PmavenCentralUsername="${{ secrets.OSSRH_USERNAME }}" \
-                       -PmavenCentralPassword="${{ secrets.OSSRH_PASSWORD }}" \
-                       publish
+          -PsigningInMemoryKey="`cat <<- EOM
+          ${{ secrets.SIGNING_KEY_SECRET }}
+          EOM`" \
+          -PsigningInMemoryKeyPassword="`cat <<- EOM
+          ${{ secrets.SIGNING_KEY_PASSWORD }}
+          EOM`" \
+          -PmavenCentralUsername="`cat <<- EOM
+          ${{ secrets.OSSRH_USERNAME }}
+          EOM`" \
+          -PmavenCentralPassword="`cat <<- EOM
+          ${{ secrets.OSSRH_PASSWORD }}
+          EOM`" \
+          publish
 
       - name: Create Pull Request
         env:
