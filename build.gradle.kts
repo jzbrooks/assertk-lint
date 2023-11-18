@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.androidLint) apply false
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.mavenPublish) apply false
     alias(libs.plugins.changelog)
 }
 

@@ -2,6 +2,7 @@ plugins {
     id("java-library")
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.mavenPublish)
 }
 
 lint {
