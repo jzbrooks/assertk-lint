@@ -10,6 +10,7 @@ class AssertkIssueRegistry : IssueRegistry() {
             TestFrameworkAssertionDetector.ISSUE,
             AssertJDetector.ISSUE,
             GoogleTruthDetector.ISSUE,
+            UnusedAssertionDetector.ISSUE,
         )
 
     override val api: Int
