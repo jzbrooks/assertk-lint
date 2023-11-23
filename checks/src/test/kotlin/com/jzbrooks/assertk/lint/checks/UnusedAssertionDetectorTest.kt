@@ -5,6 +5,7 @@ import org.junit.Test
 
 class UnusedAssertionDetectorTest : LintDetectorTest() {
     override fun getDetector() = UnusedAssertionDetector()
+
     override fun getIssues() = listOf(UnusedAssertionDetector.ISSUE)
 
     @Test
@@ -75,15 +76,17 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(assertkStub), kotlin(code)).run().expect("""src/error/TestingTesting.kt:12: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
+        lint().files(kotlin(assertkStub), kotlin(code)).run().expect(
+            """src/error/TestingTesting.kt:12: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
         assertThat(first)
         ~~~~~~~~~~~~~~~~~
-1 errors, 0 warnings"""
+1 errors, 0 warnings""",
         )
     }
 
     companion object {
-        val assertkStub = """
+        val assertkStub =
+            """
             package assertk
 
             // This name is a hack to get the test infractructure to correctly
@@ -99,6 +102,6 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             fun <T> Assertk<T>.isEqualTo(expected: T) {
 
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 }
