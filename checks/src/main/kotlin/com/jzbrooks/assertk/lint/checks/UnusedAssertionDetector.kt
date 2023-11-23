@@ -56,8 +56,7 @@ class UnusedAssertionDetector : Detector(), SourceCodeScanner {
                 id = "UnusedAssertkAssertion",
                 briefDescription = "Assertion subjects without assertions never fail a test",
                 explanation = """
-                    When you create an assertion subject with a method like `assertThat`, you
-                    must make assertions on that subject or a test will never fail.
+                    When you create an assertion subject with a method like `assertThat`, you must make assertions on that subject or a test will never fail.
                     """,
                 category = Category.CORRECTNESS,
                 priority = 6,
