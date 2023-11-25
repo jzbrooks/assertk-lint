@@ -26,7 +26,7 @@ class UnusedAssertionDetector : Detector(), SourceCodeScanner {
         val containingClass = method.containingClass
         val evaluator = context.evaluator
 
-        if (evaluator.extendsClass(containingClass, "assertk.AssertkKt", false)) {
+        if (evaluator.extendsClass(containingClass, "assertk.AssertKt", false)) {
             var usedAsReceiver = false
             val visitor =
                 object : DataFlowAnalyzer(setOf(node)) {

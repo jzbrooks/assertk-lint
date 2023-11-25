@@ -91,15 +91,15 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
 
             // This name is a hack to get the test infractructure to correctly
             // name this test stub file's class to AssertkKt
-            class Assertk<T> {
+            class Assert<T> {
 
             }
 
-            fun <T> assertThat(subject: T?): Assertk<T> {
+            fun <T> assertThat(subject: T?): Assert<T> {
 
             }
 
-            fun <T> Assertk<T>.isEqualTo(expected: T) {
+            fun <T> Assert<T>.isEqualTo(expected: T) {
 
             }
             """.trimIndent()
