@@ -10,6 +10,6 @@
 
 ## 1.0.0 - 2023-11-18
 ### Added
-- Warnings for test framework assertions
-- Warnings for Google Truth assertions (opt-in)
-- Warnings for AssertJ assertions (opt-in)
+- _TestFrameworkAssertionUse_ detects junit4, junit5, and kotlin.test assertions
+- _GoogleTruthUse_ detects Google Truth assertions (opt-in)
+- _AssertJUse_ detects AssertJ assertions (opt-in)
