@@ -1,5 +1,8 @@
 name: publish
 
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+
 on:
   workflow_dispatch:
   release:
@@ -9,6 +12,9 @@ jobs:
   publish:
     name: Release build and publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v2.3.4
