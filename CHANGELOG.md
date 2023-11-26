@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.1.0 - 2023-11-26
 ### Added
 - _UnusedAssertkAssertion_ detects unused assertion subjects
 
