@@ -18,6 +18,7 @@ kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version
 [bundles]
 lint-api = [
     "kotlinStdlib",
+    "androidLintChecks",
     "androidLintApi",
 ]
 lint-tests = [
