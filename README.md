@@ -3,7 +3,7 @@
 [![build](https://github.com/jzbrooks/assertk-lint/actions/workflows/build.yml/badge.svg)](https://github.com/jzbrooks/assertk-lint/actions/workflows/build.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.jzbrooks/assertk-lint.svg)](https://mvnrepository.com/artifact/com.jzbrooks/assertk-lint)
 
-A set of lint rules to encourage proper use of assertk
+A set of lint rules to encourage proper use of [assertk](https://github.com/willowtreeapps/assertk)
 
 ### Installation
 
