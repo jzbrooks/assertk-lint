@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+### Fixed
+- Updated detector scope to avoid requiring `checkTestSources`
 
 ## 1.1.0 - 2023-11-26
 ### Added
