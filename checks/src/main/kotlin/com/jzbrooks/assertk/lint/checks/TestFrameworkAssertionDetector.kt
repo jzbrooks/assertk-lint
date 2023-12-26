@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.isJava
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
+import java.util.EnumSet
 
 class TestFrameworkAssertionDetector : Detector(), Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
@@ -67,7 +68,7 @@ class TestFrameworkAssertionDetector : Detector(), Detector.UastScanner {
                 implementation =
                     Implementation(
                         TestFrameworkAssertionDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
                     ),
             )
     }

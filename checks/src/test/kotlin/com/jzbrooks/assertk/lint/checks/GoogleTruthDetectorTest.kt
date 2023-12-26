@@ -2,7 +2,10 @@ package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
+@RunWith(JUnit4::class)
 class GoogleTruthDetectorTest : LintDetectorTest() {
     override fun getDetector() = GoogleTruthDetector()
 
@@ -12,7 +15,7 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
         )
 
     @Test
-    fun `test clean`() {
+    fun `no issues reports clean`() {
         val code =
             """
             package error
@@ -31,7 +34,7 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test google truth assertion not reported in java source`() {
+    fun `google truth assertion not reported in java source`() {
         val code =
             """
             package error;
@@ -56,7 +59,7 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test google truth assertion detected`() {
+    fun `google truth assertion detected`() {
         val code =
             """
             package error

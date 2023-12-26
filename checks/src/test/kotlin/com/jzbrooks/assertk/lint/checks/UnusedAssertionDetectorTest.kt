@@ -2,14 +2,17 @@ package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
+@RunWith(JUnit4::class)
 class UnusedAssertionDetectorTest : LintDetectorTest() {
     override fun getDetector() = UnusedAssertionDetector()
 
     override fun getIssues() = listOf(UnusedAssertionDetector.ISSUE)
 
     @Test
-    fun `test clean`() {
+    fun `no issues reports clean`() {
         val code =
             """
             package clean
@@ -32,7 +35,7 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test clean with assignment`() {
+    fun `clean with assignment`() {
         val code =
             """
             package clean
@@ -57,7 +60,7 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test unused assertThat is detected`() {
+    fun `unused assertThat is detected`() {
         val code =
             """
             package error

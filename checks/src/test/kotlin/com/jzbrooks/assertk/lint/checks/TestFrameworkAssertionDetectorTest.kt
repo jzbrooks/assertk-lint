@@ -2,7 +2,10 @@ package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
+@RunWith(JUnit4::class)
 class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     override fun getDetector() = TestFrameworkAssertionDetector()
 
@@ -12,7 +15,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
         )
 
     @Test
-    fun `test clean`() {
+    fun `no issues reports clean`() {
         val code =
             """
             package error
@@ -31,7 +34,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test junit 4 assertion not reported for java source`() {
+    fun `junit 4 assertion not reported for java source`() {
         val code =
             """
             package error;
@@ -55,7 +58,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test junit 4 assertion detected`() {
+    fun `junit 4 assertion detected`() {
         val code =
             """
             package error
@@ -84,7 +87,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test junit 5 assertion detected`() {
+    fun `junit 5 assertion detected`() {
         val code =
             """
             package error
@@ -113,7 +116,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `test kotlin assertion detected`() {
+    fun `kotlin assertion detected`() {
         val code =
             """
             package error
