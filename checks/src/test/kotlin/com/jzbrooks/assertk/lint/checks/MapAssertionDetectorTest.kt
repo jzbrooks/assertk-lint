@@ -23,14 +23,14 @@ class MapAssertionDetectorTest : LintDetectorTest() {
 
             import java.io.File
             import assertk.assertThat
-            import assertk.keys
+            import assertk.key
             import assertk.isNotNull
 
             class TestingTesting {
                 fun testingTest() {
                     val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
 
-                    assertThat(map).keys("9A3E6FAC-0639-4F52-8E88-D9F7512540A4").isNotNull()
+                    assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4").isNotNull()
                 }
             }
             """.trimIndent()
@@ -39,14 +39,14 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `map idx`() {
+    fun `direct read from map in assertion subject creation detected`() {
         val code =
             """
             package clean
 
             import java.io.File
             import assertk.assertThat
-            import assertk.keys
+            import assertk.key
             import assertk.isNotNull
 
             class TestingTesting {
@@ -58,7 +58,10 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(assertkStub)).run().expectClean()
+        lint().files(kotlin(code), kotlin(assertkStub)).run().expect("""src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+        assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""")
     }
 
     companion object {
@@ -80,7 +83,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
 
             }
 
-            fun <T, U> Assert<Map<T, U>>.keys(key: T): Assert<U> {
+            fun <T, U> Assert<Map<T, U>>.key(key: T): Assert<U> {
 
             }
 

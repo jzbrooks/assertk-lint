@@ -30,8 +30,10 @@ class MapAssertionDetector: Detector(), Detector.UastScanner {
 
                 val evaluator = context.evaluator
 
+                // TODO: Should this be so generic?
                 if (node.returnType?.canonicalText?.startsWith("assertk.Assert") == true) {
                     for (argExpr in node.valueArguments) {
+                        // todo(jzb): Also handle get/getOr* methods
                         if (argExpr is UArrayAccessExpression &&
                             evaluator.getTypeClass(argExpr.receiver.getExpressionType())?.let {
                                 // This is goofy, but since the actual underlying definition of
