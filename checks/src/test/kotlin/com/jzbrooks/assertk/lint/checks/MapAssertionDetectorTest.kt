@@ -11,7 +11,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
 
     override fun getIssues() =
         listOf(
-            MapAssertionDetector.ISSUE,
+            MapAssertionDetector.DIRECT_READ_ISSUE,
         )
 
     @Test
@@ -58,7 +58,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -86,7 +86,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
         assertThat(map.get("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -114,7 +114,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -142,7 +142,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getOrDefault("9A3E6FAC-0639-4F52-8E88-D9F7512540A4", null)).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -150,7 +150,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `getOrThrow function read from map in assertion subject creation detected`() {
+    fun `getOrElse function read from map in assertion subject creation detected`() {
         val code =
             """
             package clean
@@ -170,7 +170,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: Assertk map assertions provide [SuboptimalMapAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getOrElse("9A3E6FAC-0639-4F52-8E88-D9F7512540A4") { error("Nope") }).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",

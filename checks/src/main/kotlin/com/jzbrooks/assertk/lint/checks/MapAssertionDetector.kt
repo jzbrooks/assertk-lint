@@ -60,10 +60,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                         if (isMapRead) {
                             context.report(
-                                ISSUE,
+                                DIRECT_READ_ISSUE,
                                 node,
                                 context.getLocation(argExpr),
-                                ISSUE.getBriefDescription(TextFormat.TEXT),
+                                DIRECT_READ_ISSUE.getBriefDescription(TextFormat.TEXT),
                             )
                         }
                     }
@@ -103,13 +103,17 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             )
 
         @JvmField
-        val ISSUE: Issue =
+        val DIRECT_READ_ISSUE: Issue =
             Issue.create(
-                id = "SuboptimalMapAssertion",
-                briefDescription = "Assertk map assertions provide",
+                id = "MapValueAssertion",
+                briefDescription =
+                    "assertk provides built-in methods to" +
+                        " make assertions on particular map values",
                 explanation = """
-                    AssertJ assertions should not be used in Kotlin tests. Use assertk instead.
-                    """,
+                    assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which
+                    asserts that the value is present _and_ transforms the assertion
+                    subject into an assertion on the value type.
+                """,
                 category = Category.CORRECTNESS,
                 priority = 6,
                 severity = Severity.WARNING,
