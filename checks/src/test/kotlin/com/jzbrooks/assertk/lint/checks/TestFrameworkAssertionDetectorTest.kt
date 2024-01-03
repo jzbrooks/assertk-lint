@@ -164,7 +164,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
         """
 
         private const val KOTLIN_TEST_ASSERT_STUB = """
-            @file:kotlin.jvm.JvmName("AssertionsKt")
+            @file:kotlin.jvm.JvmName("AssertionsKt__AssertionsKt")
 
             package kotlin.test
 
