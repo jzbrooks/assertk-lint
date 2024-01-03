@@ -3,6 +3,7 @@
 ## Unreleased
 ### Fixed
 - Updated detector scope to avoid requiring `checkTestSources`
+- kotlin.test assertions were not detected by _TestFrameworkAssertionDetector_
 
 ## 1.1.0 - 2023-11-26
 ### Added
