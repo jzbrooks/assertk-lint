@@ -48,6 +48,8 @@ jobs:
         run: ./gradlew --no-configuration-cache publish
 
       - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ github.event.release.tag_name }}"
           BRANCH="changelog-update-$VERSION"
