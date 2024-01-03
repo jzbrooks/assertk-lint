@@ -13,9 +13,4 @@ _Note: For non-android projects, you must apply the com.android.lint Gradle plug
 dependencies {
   lintChecks("com.jzbrooks:assertk-lint:<version>")
 }
-
-// Your lint configuration must opt-in to running lint on test source!
-lint {
-    checkTestSources = true
-}
 ```
