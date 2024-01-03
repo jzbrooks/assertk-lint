@@ -28,7 +28,7 @@ class TestFrameworkAssertionDetector : Detector(), Detector.UastScanner {
                     // junit 5
                     "org.junit.jupiter.api.Assertions",
                     // kotlin.test
-                    "kotlin.test.AssertionsKt",
+                    "kotlin.test.AssertionsKt__AssertionsKt",
                 )
 
             override fun visitCallExpression(node: UCallExpression) {
