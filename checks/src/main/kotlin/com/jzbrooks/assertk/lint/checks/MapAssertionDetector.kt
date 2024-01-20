@@ -90,19 +90,33 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 argExpr: UExpression,
                 node: UCallExpression,
             ) {
+                var mapExpression: UExpression? = null
+
                 val isKeyRead =
                     when (argExpr) {
                         is UCallableReferenceExpression -> {
-                            evaluator.isMapType(argExpr.qualifierType) &&
+                            if (evaluator.isMapType(argExpr.qualifierType) &&
                                 argExpr.callableName == "keys"
+                            ) {
+                                mapExpression = argExpr.qualifierExpression
+                                true
+                            } else {
+                                false
+                            }
                         }
 
                         is UQualifiedReferenceExpression -> {
                             val call = argExpr.selector
 
                             if (call is USimpleNameReferenceExpression) {
-                                evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
+                                if (evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
                                     call.identifier == "keys"
+                                ) {
+                                    mapExpression = argExpr.receiver
+                                    true
+                                } else {
+                                    false
+                                }
                             } else {
                                 false
                             }
@@ -126,6 +140,25 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                 node,
                                 context.getLocation(parentExpr),
                                 KEYS_SET_CHECK.getBriefDescription(TextFormat.TEXT),
+                                quickfixData =
+                                    mapExpression?.let { mapExpr ->
+                                        callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
+                                            fix().replace()
+                                                .range(context.getLocation(parentExpr))
+                                                .with(
+                                                    buildString {
+                                                        append("assertThat(")
+                                                        append(mapExpr.sourcePsi!!.text)
+                                                        append(").doesNotContainKey(")
+                                                        append(keyExpr.sourcePsi!!.text)
+                                                        append(')')
+                                                    },
+                                                )
+                                                .reformat(true)
+                                                .imports("assertk.assertions.doesNotContainKey")
+                                                .build()
+                                        }
+                                    },
                             )
                         }
                     }

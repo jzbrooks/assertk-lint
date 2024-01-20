@@ -232,6 +232,40 @@ class MapAssertionDetectorTest : LintDetectorTest() {
         )
     }
 
+    @Test
+    fun `map keys read for doesNotContain quick fixed`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.doesNotContain
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map.keys).doesNotContain("")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(
+            kotlin(code),
+            kotlin(assertkStub),
+            kotlin(assertkCollectionStub),
+        ).run().expectFixDiffs(
+            """Fix for src/clean/TestingTesting.kt line 11: Replace with assertThat(map).doesNotContainKey(""):
+            |@@ -3 +3
+            |+ import assertk.assertions.doesNotContainKey
+            |@@ -11 +12
+            |-         assertThat(map.keys).doesNotContain("")
+            |+         assertThat(map).doesNotContainKey("")
+            """.trimMargin(),
+        )
+    }
+
     companion object {
         val assertkStub =
             """
