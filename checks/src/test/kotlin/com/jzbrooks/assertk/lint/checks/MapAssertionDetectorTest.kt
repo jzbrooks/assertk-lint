@@ -12,6 +12,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     override fun getIssues() =
         listOf(
             MapAssertionDetector.DIRECT_READ_ISSUE,
+            MapAssertionDetector.KEYS_SET_CHECK,
         )
 
     @Test
@@ -58,7 +59,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -86,7 +87,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
         assertThat(map.get("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -114,7 +115,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -142,7 +143,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getOrDefault("9A3E6FAC-0639-4F52-8E88-D9F7512540A4", null)).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -170,9 +171,63 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides built-in methods to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
         assertThat(map.getOrElse("9A3E6FAC-0639-4F52-8E88-D9F7512540A4") { error("Nope") }).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+        )
+    }
+
+    @Test
+    fun `map keys read for checking key not present`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.doesNotContain
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map.keys).doesNotContain("")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
+            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+        assertThat(map.keys).doesNotContain("")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+        )
+    }
+
+    @Test
+    fun `map keys kprop for checking key not present`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.doesNotContain
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map::keys).doesNotContain("")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
+            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+        assertThat(map::keys).doesNotContain("")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
         )
     }
@@ -201,6 +256,20 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun <T> Assert<T?>.isNotNull(): Assert<T> {
+
+            }
+            """.trimIndent()
+
+        val assertkCollectionStub =
+            """
+            package assertk.assertions
+
+            // This name is a hack to get the test infractructure to correctly
+            // name this test stub file's class to AssertkKt
+            class Collection {
+            }
+
+            fun <T> Assert<Iterable<T>>.doesNotContain(value: T) {
 
             }
             """.trimIndent()

@@ -11,11 +11,16 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
 import com.android.tools.lint.detector.api.isJava
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
 import org.jetbrains.uast.UArrayAccessExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UCallableReferenceExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.USimpleNameReferenceExpression
+import org.jetbrains.uast.skipParenthesizedExprUp
 import java.util.EnumSet
 
 class MapAssertionDetector : Detector(), Detector.UastScanner {
@@ -26,6 +31,9 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
+            private val PsiMethod.isAssertThat: Boolean
+                get() = name == "assertThat" && containingClass?.qualifiedName == "assertk.AssertKt"
+
             override fun visitCallExpression(node: UCallExpression) {
                 // Avoid enforcing assertk use in java
                 // sources for mixed language codebases
@@ -34,36 +42,90 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                 val evaluator = context.evaluator
 
-                if (method.containingClass?.qualifiedName == "assertk.AssertKt" &&
-                    method.name == "assertThat"
-                ) {
+                if (method.isAssertThat) {
                     for (argExpr in node.valueArguments) {
-                        val isMapRead =
-                            when (argExpr) {
-                                is UArrayAccessExpression -> {
-                                    evaluator.isMapType(argExpr.receiver.getExpressionType())
-                                }
+                        reportAnyDirectMapRead(evaluator, argExpr, node)
+                        reportAnyKeyAbsenceCheck(evaluator, argExpr, node)
+                    }
+                }
+            }
 
-                                is UQualifiedReferenceExpression -> {
-                                    val call = argExpr.selector
+            private fun reportAnyDirectMapRead(
+                evaluator: JavaEvaluator,
+                argExpr: UExpression,
+                node: UCallExpression,
+            ) {
+                val isMapRead =
+                    when (argExpr) {
+                        is UArrayAccessExpression -> {
+                            evaluator.isMapType(argExpr.receiver.getExpressionType())
+                        }
 
-                                    if (call is UCallExpression) {
-                                        evaluator.isMapType(call.receiverType) &&
-                                            call.methodName in MAP_ACCESSOR_METHOD_NAMES
-                                    } else {
-                                        false
-                                    }
-                                }
+                        is UQualifiedReferenceExpression -> {
+                            val call = argExpr.selector
 
-                                else -> false
+                            if (call is UCallExpression) {
+                                evaluator.isMapType(call.receiverType) &&
+                                    call.methodName in MAP_ACCESSOR_METHOD_NAMES
+                            } else {
+                                false
                             }
+                        }
 
-                        if (isMapRead) {
+                        else -> false
+                    }
+
+                if (isMapRead) {
+                    context.report(
+                        DIRECT_READ_ISSUE,
+                        node,
+                        context.getLocation(argExpr),
+                        DIRECT_READ_ISSUE.getBriefDescription(TextFormat.TEXT),
+                    )
+                }
+            }
+
+            private fun reportAnyKeyAbsenceCheck(
+                evaluator: JavaEvaluator,
+                argExpr: UExpression,
+                node: UCallExpression,
+            ) {
+                val isKeyRead =
+                    when (argExpr) {
+                        is UCallableReferenceExpression -> {
+                            evaluator.isMapType(argExpr.qualifierType) &&
+                                argExpr.callableName == "keys"
+                        }
+
+                        is UQualifiedReferenceExpression -> {
+                            val call = argExpr.selector
+
+                            if (call is USimpleNameReferenceExpression) {
+                                evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
+                                    call.identifier == "keys"
+                            } else {
+                                false
+                            }
+                        }
+
+                        else -> false
+                    }
+
+                if (isKeyRead) {
+                    val parentExpr =
+                        skipParenthesizedExprUp(node.uastParent)
+                            as? UQualifiedReferenceExpression
+
+                    val callExpr = parentExpr?.selector as? UCallExpression
+                    if (callExpr?.methodIdentifier?.name == "doesNotContain") {
+                        val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
+
+                        if (containingClassName == "assertk.assertions.CollectionKt") {
                             context.report(
-                                DIRECT_READ_ISSUE,
+                                KEYS_SET_CHECK,
                                 node,
-                                context.getLocation(argExpr),
-                                DIRECT_READ_ISSUE.getBriefDescription(TextFormat.TEXT),
+                                context.getLocation(parentExpr),
+                                KEYS_SET_CHECK.getBriefDescription(TextFormat.TEXT),
                             )
                         }
                     }
@@ -107,14 +169,33 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             Issue.create(
                 id = "MapValueAssertion",
                 briefDescription =
-                    "assertk provides built-in methods to" +
+                    "assertk provides Assert<Map<U, V>>.key(U) to" +
                         " make assertions on particular map values",
                 explanation = """
-                    assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which
-                    asserts that the value is present _and_ transforms the assertion
-                    subject into an assertion on the value type.
+                    assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which asserts that the value is present _and_ transforms the assertion subject into an assertion on the value type.
                 """,
                 category = Category.CORRECTNESS,
+                priority = 6,
+                severity = Severity.WARNING,
+                enabledByDefault = false,
+                implementation =
+                    Implementation(
+                        MapAssertionDetector::class.java,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                    ),
+            )
+
+        @JvmField
+        val KEYS_SET_CHECK: Issue =
+            Issue.create(
+                id = "KeysSetCheck",
+                briefDescription =
+                    "assertk provides Assert<Map<U, V>>.doesNotContainKey() to" +
+                        " assert that a key is not present in a map",
+                explanation = """
+                    assertk provides `Assert<Map<U, V>>.doesNotContainKey(U)` which asserts that the key is not present in the map with a consistent assertion message.
+                """,
+                category = Category.USABILITY,
                 priority = 6,
                 severity = Severity.WARNING,
                 enabledByDefault = false,
