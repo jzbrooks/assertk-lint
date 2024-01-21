@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+### Added
+- _MapValueAssertion_ requires using assertk's `key` function to make assertions on a particular map value
+- _KeySetAbsentAssertion_ requires using assertk's `doesNotContainKey` function to assert a key is absent in a map
+- _KeySetPresentAssertion_ requires using assertk's `key` function to assert a key is present in a map
 
 ## 1.1.1 - 2024-01-02
 ### Fixed
