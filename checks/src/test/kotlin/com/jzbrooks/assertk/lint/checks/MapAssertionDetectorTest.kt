@@ -266,6 +266,67 @@ class MapAssertionDetectorTest : LintDetectorTest() {
         )
     }
 
+    @Test
+    fun `map keys read for checking key is present`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.contains
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
+            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+        assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+        )
+    }
+
+    @Test
+    fun `map keys read for contains quick fixed`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.contains
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(
+            kotlin(code),
+            kotlin(assertkStub),
+            kotlin(assertkCollectionStub),
+        ).run().expectFixDiffs(
+            """Fix for src/clean/TestingTesting.kt line 11: Replace with assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4"):
+            |@@ -3 +3
+            |+ import assertk.assertions.key
+            |@@ -11 +12
+            |-         assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+            |+         assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+            """.trimMargin(),
+        )
+    }
+
     companion object {
         val assertkStub =
             """
@@ -304,6 +365,10 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun <T> Assert<Iterable<T>>.doesNotContain(value: T) {
+
+            }
+
+            fun <T> Assert<Iterable<T>>.contains(value: T) {
 
             }
             """.trimIndent()

@@ -13,6 +13,7 @@ import com.android.tools.lint.detector.api.TextFormat
 import com.android.tools.lint.detector.api.isJava
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
+import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.uast.UArrayAccessExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UCallableReferenceExpression
@@ -46,6 +47,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                     for (argExpr in node.valueArguments) {
                         reportAnyDirectMapRead(evaluator, argExpr, node)
                         reportAnyKeyAbsenceCheck(evaluator, argExpr, node)
+                        reportAnyKeyPresenceCheck(evaluator, argExpr, node)
                     }
                 }
             }
@@ -152,13 +154,115 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                                         append("assertThat(")
                                                         append(mapExpr.sourcePsi!!.text)
                                                         append(").doesNotContainKey(")
-                                                        append(keyExpr.sourcePsi!!.text)
+
+                                                        // For some reason KtLiteralStringTemplateEntry
+                                                        // does not include string delimiters in its
+                                                        // text
+                                                        val keyExprPsi = keyExpr.sourcePsi!!
+                                                        if (keyExprPsi is KtLiteralStringTemplateEntry) {
+                                                            append('"')
+                                                            append(keyExprPsi.text)
+                                                            append('"')
+                                                        } else {
+                                                            append(keyExprPsi.text)
+                                                        }
                                                         append(')')
                                                     },
                                                 )
                                                 .build()
                                         }
                                     },
+                            )
+                        }
+                    }
+                }
+            }
+
+            private fun reportAnyKeyPresenceCheck(
+                evaluator: JavaEvaluator,
+                argExpr: UExpression,
+                node: UCallExpression,
+            ) {
+                var mapExpression: UExpression? = null
+
+                val isKeyRead =
+                    when (argExpr) {
+                        is UCallableReferenceExpression -> {
+                            if (evaluator.isMapType(argExpr.qualifierType) &&
+                                argExpr.callableName == "keys"
+                            ) {
+                                mapExpression = argExpr.qualifierExpression
+                                true
+                            } else {
+                                false
+                            }
+                        }
+
+                        is UQualifiedReferenceExpression -> {
+                            val call = argExpr.selector
+
+                            if (call is USimpleNameReferenceExpression) {
+                                if (evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
+                                    call.identifier == "keys"
+                                ) {
+                                    mapExpression = argExpr.receiver
+                                    true
+                                } else {
+                                    false
+                                }
+                            } else {
+                                false
+                            }
+                        }
+
+                        else -> false
+                    }
+
+                if (isKeyRead) {
+                    val parentExpr =
+                        skipParenthesizedExprUp(node.uastParent)
+                            as? UQualifiedReferenceExpression
+
+                    val callExpr = parentExpr?.selector as? UCallExpression
+                    if (callExpr?.methodIdentifier?.name == "contains") {
+                        val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
+
+                        if (containingClassName == "assertk.assertions.IterableKt") {
+                            context.report(
+                                KEYS_SET_CHECK,
+                                node,
+                                context.getLocation(parentExpr),
+                                KEYS_SET_CHECK.getBriefDescription(TextFormat.TEXT),
+                                quickfixData =
+                                mapExpression?.let { mapExpr ->
+                                    callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
+                                        fix().replace()
+                                            .imports("assertk.assertions.key")
+                                            .reformat(true)
+                                            .range(context.getLocation(parentExpr))
+                                            .with(
+                                                buildString {
+                                                    append("assertThat(")
+                                                    append(mapExpr.sourcePsi!!.text)
+                                                    append(").key(")
+
+                                                    // For some reason KtLiteralStringTemplateEntry
+                                                    // does not include string delimiters in its
+                                                    // text
+                                                    val keyExprPsi = keyExpr.sourcePsi!!
+                                                    if (keyExprPsi is KtLiteralStringTemplateEntry) {
+                                                        append('"')
+                                                        append(keyExprPsi.text)
+                                                        append('"')
+                                                    } else {
+                                                        append(keyExprPsi.text)
+                                                    }
+                                                    append(')')
+                                                },
+                                            )
+                                            .build()
+                                    }
+                                },
                             )
                         }
                     }
