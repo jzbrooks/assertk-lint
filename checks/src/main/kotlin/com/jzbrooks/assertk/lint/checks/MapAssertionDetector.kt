@@ -138,10 +138,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
-                                KEYS_SET_CHECK,
+                                KEYS_SET_ABSENT_CHECK,
                                 node,
                                 context.getLocation(parentExpr),
-                                KEYS_SET_CHECK.getBriefDescription(TextFormat.TEXT),
+                                KEYS_SET_ABSENT_CHECK.getBriefDescription(TextFormat.TEXT),
                                 quickfixData =
                                     mapExpression?.let { mapExpr ->
                                         callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
@@ -229,10 +229,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
-                                KEYS_SET_CHECK,
+                                KEYS_SET_PRESENT_CHECK,
                                 node,
                                 context.getLocation(parentExpr),
-                                KEYS_SET_CHECK.getBriefDescription(TextFormat.TEXT),
+                                KEYS_SET_PRESENT_CHECK.getBriefDescription(TextFormat.TEXT),
                                 quickfixData =
                                 mapExpression?.let { mapExpr ->
                                     callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
@@ -305,9 +305,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
         val DIRECT_READ_ISSUE: Issue =
             Issue.create(
                 id = "MapValueAssertion",
-                briefDescription =
-                    "assertk provides Assert<Map<U, V>>.key(U) to" +
-                        " make assertions on particular map values",
+                briefDescription = "Use Assert.key for map entries",
                 explanation = """
                     assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which asserts that the value is present _and_ transforms the assertion subject into an assertion on the value type.
                 """,
@@ -322,12 +320,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             )
 
         @JvmField
-        val KEYS_SET_CHECK: Issue =
+        val KEYS_SET_ABSENT_CHECK: Issue =
             Issue.create(
-                id = "KeysSetCheck",
-                briefDescription =
-                    "assertk provides Assert<Map<U, V>>.doesNotContainKey() to" +
-                        " assert that a key is not present in a map",
+                id = "KeysSetAbsentCheck",
+                briefDescription = "Use Assert.doesNotContainKey to assert absence",
                 explanation = """
                     assertk provides `Assert<Map<U, V>>.doesNotContainKey(U)` which asserts that the key is not present in the map with a consistent assertion message.
                 """,
@@ -339,6 +335,24 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                         MapAssertionDetector::class.java,
                         EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
                     ),
+            )
+
+        @JvmField
+        val KEYS_SET_PRESENT_CHECK: Issue =
+            Issue.create(
+                id = "KeysSetPresentCheck",
+                briefDescription = "Use Assert.key to assert presence",
+                explanation = """
+                    assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which asserts that the value is present _and_ transforms the assertion subject into an assertion on the value type.
+                """,
+                category = Category.USABILITY,
+                priority = 6,
+                severity = Severity.WARNING,
+                implementation =
+                Implementation(
+                    MapAssertionDetector::class.java,
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                ),
             )
     }
 }

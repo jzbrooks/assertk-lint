@@ -10,7 +10,8 @@ class AssertkIssueRegistry : IssueRegistry() {
             AssertJDetector.ISSUE,
             GoogleTruthDetector.ISSUE,
             MapAssertionDetector.DIRECT_READ_ISSUE,
-            MapAssertionDetector.KEYS_SET_CHECK,
+            MapAssertionDetector.KEYS_SET_ABSENT_CHECK,
+            MapAssertionDetector.KEYS_SET_PRESENT_CHECK,
             TestFrameworkAssertionDetector.ISSUE,
             UnusedAssertionDetector.ISSUE,
         )

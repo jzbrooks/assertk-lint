@@ -12,7 +12,8 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     override fun getIssues() =
         listOf(
             MapAssertionDetector.DIRECT_READ_ISSUE,
-            MapAssertionDetector.KEYS_SET_CHECK,
+            MapAssertionDetector.KEYS_SET_PRESENT_CHECK,
+            MapAssertionDetector.KEYS_SET_ABSENT_CHECK,
         )
 
     @Test
@@ -59,7 +60,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: Use Assert.key for map entries [MapValueAssertion]
         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -87,7 +88,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: Use Assert.key for map entries [MapValueAssertion]
         assertThat(map.get("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -115,7 +116,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: Use Assert.key for map entries [MapValueAssertion]
         assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -143,7 +144,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: Use Assert.key for map entries [MapValueAssertion]
         assertThat(map.getOrDefault("9A3E6FAC-0639-4F52-8E88-D9F7512540A4", null)).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -171,7 +172,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
-            """src/clean/TestingTesting.kt:12: Warning: assertk provides Assert<Map<U, V>>.key(U) to make assertions on particular map values [MapValueAssertion]
+            """src/clean/TestingTesting.kt:12: Warning: Use Assert.key for map entries [MapValueAssertion]
         assertThat(map.getOrElse("9A3E6FAC-0639-4F52-8E88-D9F7512540A4") { error("Nope") }).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -198,7 +199,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeysSetAbsentCheck]
         assertThat(map.keys).doesNotContain("")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -225,7 +226,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeysSetAbsentCheck]
         assertThat(map::keys).doesNotContain("")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -286,7 +287,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: assertk provides Assert<Map<U, V>>.doesNotContainKey() to assert that a key is not present in a map [KeysSetCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.key to assert presence [KeysSetPresentCheck]
         assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
