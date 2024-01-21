@@ -12,8 +12,8 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     override fun getIssues() =
         listOf(
             MapAssertionDetector.DIRECT_READ_ISSUE,
-            MapAssertionDetector.KEYS_SET_PRESENT_CHECK,
-            MapAssertionDetector.KEYS_SET_ABSENT_CHECK,
+            MapAssertionDetector.KEYS_SET_PRESENT_ISSUE,
+            MapAssertionDetector.KEYS_SET_ABSENT_ISSUE,
         )
 
     @Test
@@ -199,7 +199,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeysSetAbsentCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeySetAbsentAssertion]
         assertThat(map.keys).doesNotContain("")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -226,7 +226,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeysSetAbsentCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.doesNotContainKey to assert absence [KeySetAbsentAssertion]
         assertThat(map::keys).doesNotContain("")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -287,7 +287,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), kotlin(assertkStub), kotlin(assertkCollectionStub)).run().expect(
-            """src/clean/TestingTesting.kt:11: Warning: Use Assert.key to assert presence [KeysSetPresentCheck]
+            """src/clean/TestingTesting.kt:11: Warning: Use Assert.key to assert presence [KeySetPresentAssertion]
         assertThat(map.keys).contains("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",

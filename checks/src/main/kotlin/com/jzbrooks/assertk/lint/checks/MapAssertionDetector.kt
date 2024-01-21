@@ -138,10 +138,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
-                                KEYS_SET_ABSENT_CHECK,
+                                KEYS_SET_ABSENT_ISSUE,
                                 node,
                                 context.getLocation(parentExpr),
-                                KEYS_SET_ABSENT_CHECK.getBriefDescription(TextFormat.TEXT),
+                                KEYS_SET_ABSENT_ISSUE.getBriefDescription(TextFormat.TEXT),
                                 quickfixData =
                                     mapExpression?.let { mapExpr ->
                                         callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
@@ -229,10 +229,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
-                                KEYS_SET_PRESENT_CHECK,
+                                KEYS_SET_PRESENT_ISSUE,
                                 node,
                                 context.getLocation(parentExpr),
-                                KEYS_SET_PRESENT_CHECK.getBriefDescription(TextFormat.TEXT),
+                                KEYS_SET_PRESENT_ISSUE.getBriefDescription(TextFormat.TEXT),
                                 quickfixData =
                                 mapExpression?.let { mapExpr ->
                                     callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
@@ -320,9 +320,9 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             )
 
         @JvmField
-        val KEYS_SET_ABSENT_CHECK: Issue =
+        val KEYS_SET_ABSENT_ISSUE: Issue =
             Issue.create(
-                id = "KeysSetAbsentCheck",
+                id = "KeySetAbsentAssertion",
                 briefDescription = "Use Assert.doesNotContainKey to assert absence",
                 explanation = """
                     assertk provides `Assert<Map<U, V>>.doesNotContainKey(U)` which asserts that the key is not present in the map with a consistent assertion message.
@@ -338,9 +338,9 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             )
 
         @JvmField
-        val KEYS_SET_PRESENT_CHECK: Issue =
+        val KEYS_SET_PRESENT_ISSUE: Issue =
             Issue.create(
-                id = "KeysSetPresentCheck",
+                id = "KeySetPresentAssertion",
                 briefDescription = "Use Assert.key to assert presence",
                 explanation = """
                     assertk provides `Assert<Map<U, V>>.key(U): Assert<V>` which asserts that the value is present _and_ transforms the assertion subject into an assertion on the value type.
