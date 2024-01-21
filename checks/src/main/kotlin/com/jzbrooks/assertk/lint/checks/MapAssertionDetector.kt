@@ -57,32 +57,70 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 argExpr: UExpression,
                 node: UCallExpression,
             ) {
-                val isMapRead =
+                val mapValueRead =
                     when (argExpr) {
                         is UArrayAccessExpression -> {
                             evaluator.isMapType(argExpr.receiver.getExpressionType())
+                            ValueRead(argExpr.receiver, argExpr.indices.firstOrNull())
                         }
 
                         is UQualifiedReferenceExpression -> {
                             val call = argExpr.selector
 
-                            if (call is UCallExpression) {
+                            if (call is UCallExpression &&
                                 evaluator.isMapType(call.receiverType) &&
-                                    call.methodName in MAP_ACCESSOR_METHOD_NAMES
+                                call.methodName in MAP_ACCESSOR_METHOD_NAMES
+                            ) {
+                                ValueRead(argExpr.receiver, call.valueArguments.firstOrNull())
                             } else {
-                                false
+                                null
                             }
                         }
 
-                        else -> false
+                        else -> null
                     }
 
-                if (isMapRead) {
+                if (mapValueRead != null) {
+                    val quickFix =
+                        if (mapValueRead.keyExpression != null) {
+                            fix().replace()
+                                .imports("assertk.assertions.key")
+                                .reformat(true)
+                                .range(context.getLocation(node))
+                                .with(
+                                    buildString {
+                                        append("assertThat(")
+                                        append(mapValueRead.mapExpression.sourcePsi!!.text)
+                                        append(").key(")
+
+                                        // For some reason KtLiteralStringTemplateEntry
+                                        // does not include string delimiters in its
+                                        // text
+                                        val keyExprPsi = mapValueRead.keyExpression.sourcePsi!!
+                                        if (
+                                            keyExprPsi is
+                                                KtLiteralStringTemplateEntry
+                                        ) {
+                                            append('"')
+                                            append(keyExprPsi.text)
+                                            append('"')
+                                        } else {
+                                            append(keyExprPsi.text)
+                                        }
+                                        append(')')
+                                    },
+                                )
+                                .build()
+                        } else {
+                            null
+                        }
+
                     context.report(
                         DIRECT_READ_ISSUE,
                         node,
                         context.getLocation(argExpr),
                         DIRECT_READ_ISSUE.getBriefDescription(TextFormat.TEXT),
+                        quickfixData = quickFix,
                     )
                 }
             }
@@ -235,9 +273,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                         if (evaluator.isMapType(expression.qualifierType) &&
                             expression.callableName == "keys"
                         ) {
-                            // For some reason this is always null, otherwise we wouldn't
-                            // need the KeysRead type but could instead return the expression
-                            // to indicate this is an interesting expression.
+                            // For some reason this is always null
                             KeysRead(expression.qualifierExpression)
                         } else {
                             null
@@ -287,7 +323,12 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             }
         }
 
+    // For some reason the expression is always null in a callable ref scenario,
+    // otherwise we wouldn't need the KeysRead type but could instead
+    // return the expression to indicate this is an interesting expression.
     private data class KeysRead(val mapExpression: UExpression?)
+
+    private data class ValueRead(val mapExpression: UExpression, val keyExpression: UExpression?)
 
     companion object {
         private val MAP_ACCESSOR_METHOD_NAMES =

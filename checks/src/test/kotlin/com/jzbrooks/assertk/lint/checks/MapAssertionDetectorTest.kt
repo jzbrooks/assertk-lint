@@ -68,6 +68,38 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `get operator read from map replaced with key`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.key
+            import assertk.isNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub)).run().expectFixDiffs(
+            """
+            Fix for src/clean/TestingTesting.kt line 12: Replace with assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4"):
+            @@ -3 +3
+            + import assertk.assertions.key
+            @@ -12 +13
+            -         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
+            +         assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4").isNotNull()
+            """.trimIndent(),
+        )
+    }
+
+    @Test
     fun `get function read from map in assertion subject creation detected`() {
         val code =
             """
@@ -120,6 +152,36 @@ class MapAssertionDetectorTest : LintDetectorTest() {
         assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
+        )
+    }
+
+    @Test
+    fun `getValue function read from map replaced with key`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.key
+            import assertk.isNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub)).run().expectFixDiffs(
+            """Fix for src/clean/TestingTesting.kt line 12: Replace with assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4"):
+@@ -3 +3
++ import assertk.assertions.key
+@@ -12 +13
+-         assertThat(map.getValue("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")).isNotNull()
++         assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4").isNotNull()""",
         )
     }
 
