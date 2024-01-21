@@ -134,7 +134,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                     if (callExpr?.methodIdentifier?.name == "doesNotContain") {
                         val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
 
-                        if (containingClassName == "assertk.assertions.CollectionKt") {
+                        if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
                                 KEYS_SET_CHECK,
                                 node,
@@ -144,6 +144,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                     mapExpression?.let { mapExpr ->
                                         callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
                                             fix().replace()
+                                                .imports("assertk.assertions.doesNotContainKey")
+                                                .reformat(true)
                                                 .range(context.getLocation(parentExpr))
                                                 .with(
                                                     buildString {
@@ -154,8 +156,6 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                                         append(')')
                                                     },
                                                 )
-                                                .reformat(true)
-                                                .imports("assertk.assertions.doesNotContainKey")
                                                 .build()
                                         }
                                     },
@@ -210,7 +210,6 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 category = Category.CORRECTNESS,
                 priority = 6,
                 severity = Severity.WARNING,
-                enabledByDefault = false,
                 implementation =
                     Implementation(
                         MapAssertionDetector::class.java,
@@ -231,7 +230,6 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 category = Category.USABILITY,
                 priority = 6,
                 severity = Severity.WARNING,
-                enabledByDefault = false,
                 implementation =
                     Implementation(
                         MapAssertionDetector::class.java,

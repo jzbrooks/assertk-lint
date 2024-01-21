@@ -300,7 +300,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
 
             // This name is a hack to get the test infractructure to correctly
             // name this test stub file's class to AssertkKt
-            class Collection {
+            class Iterable {
             }
 
             fun <T> Assert<Iterable<T>>.doesNotContain(value: T) {
