@@ -92,42 +92,9 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 argExpr: UExpression,
                 node: UCallExpression,
             ) {
-                var mapExpression: UExpression? = null
+                val keysRead = getReceiverForKeysRead(evaluator, argExpr)
 
-                val isKeyRead =
-                    when (argExpr) {
-                        is UCallableReferenceExpression -> {
-                            if (evaluator.isMapType(argExpr.qualifierType) &&
-                                argExpr.callableName == "keys"
-                            ) {
-                                mapExpression = argExpr.qualifierExpression
-                                true
-                            } else {
-                                false
-                            }
-                        }
-
-                        is UQualifiedReferenceExpression -> {
-                            val call = argExpr.selector
-
-                            if (call is USimpleNameReferenceExpression) {
-                                if (evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
-                                    call.identifier == "keys"
-                                ) {
-                                    mapExpression = argExpr.receiver
-                                    true
-                                } else {
-                                    false
-                                }
-                            } else {
-                                false
-                            }
-                        }
-
-                        else -> false
-                    }
-
-                if (isKeyRead) {
+                if (keysRead != null) {
                     val parentExpr =
                         skipParenthesizedExprUp(node.uastParent)
                             as? UQualifiedReferenceExpression
@@ -136,45 +103,48 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                     if (callExpr?.methodIdentifier?.name == "doesNotContain") {
                         val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
 
+                        val callArgument = callExpr.valueArguments.firstOrNull()
+                        val quickFix =
+                            if (keysRead.mapExpression != null && callArgument != null) {
+                                fix().replace()
+                                    .imports("assertk.assertions.doesNotContainKey")
+                                    .reformat(true)
+                                    .range(context.getLocation(parentExpr))
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(keysRead.mapExpression.sourcePsi!!.text)
+                                            append(").doesNotContainKey(")
+
+                                            // For some reason KtLiteralStringTemplateEntry
+                                            // does not include string delimiters in its
+                                            // text
+                                            val keyExprPsi = callArgument.sourcePsi!!
+                                            if (
+                                                keyExprPsi is
+                                                    KtLiteralStringTemplateEntry
+                                            ) {
+                                                append('"')
+                                                append(keyExprPsi.text)
+                                                append('"')
+                                            } else {
+                                                append(keyExprPsi.text)
+                                            }
+                                            append(')')
+                                        },
+                                    )
+                                    .build()
+                            } else {
+                                null
+                            }
+
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
                                 KEYS_SET_ABSENT_ISSUE,
                                 node,
                                 context.getLocation(parentExpr),
                                 KEYS_SET_ABSENT_ISSUE.getBriefDescription(TextFormat.TEXT),
-                                quickfixData =
-                                    mapExpression?.let { mapExpr ->
-                                        callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
-                                            fix().replace()
-                                                .imports("assertk.assertions.doesNotContainKey")
-                                                .reformat(true)
-                                                .range(context.getLocation(parentExpr))
-                                                .with(
-                                                    buildString {
-                                                        append("assertThat(")
-                                                        append(mapExpr.sourcePsi!!.text)
-                                                        append(").doesNotContainKey(")
-
-                                                        // For some reason KtLiteralStringTemplateEntry
-                                                        // does not include string delimiters in its
-                                                        // text
-                                                        val keyExprPsi = keyExpr.sourcePsi!!
-                                                        if (
-                                                            keyExprPsi is
-                                                                KtLiteralStringTemplateEntry
-                                                        ) {
-                                                            append('"')
-                                                            append(keyExprPsi.text)
-                                                            append('"')
-                                                        } else {
-                                                            append(keyExprPsi.text)
-                                                        }
-                                                        append(')')
-                                                    },
-                                                )
-                                                .build()
-                                        }
-                                    },
+                                quickfixData = quickFix,
                             )
                         }
                     }
@@ -186,42 +156,9 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 argExpr: UExpression,
                 node: UCallExpression,
             ) {
-                var mapExpression: UExpression? = null
+                val keysRead = getReceiverForKeysRead(evaluator, argExpr)
 
-                val isKeyRead =
-                    when (argExpr) {
-                        is UCallableReferenceExpression -> {
-                            if (evaluator.isMapType(argExpr.qualifierType) &&
-                                argExpr.callableName == "keys"
-                            ) {
-                                mapExpression = argExpr.qualifierExpression
-                                true
-                            } else {
-                                false
-                            }
-                        }
-
-                        is UQualifiedReferenceExpression -> {
-                            val call = argExpr.selector
-
-                            if (call is USimpleNameReferenceExpression) {
-                                if (evaluator.isMapType(argExpr.receiver.getExpressionType()) &&
-                                    call.identifier == "keys"
-                                ) {
-                                    mapExpression = argExpr.receiver
-                                    true
-                                } else {
-                                    false
-                                }
-                            } else {
-                                false
-                            }
-                        }
-
-                        else -> false
-                    }
-
-                if (isKeyRead) {
+                if (keysRead != null) {
                     val parentExpr =
                         skipParenthesizedExprUp(node.uastParent)
                             as? UQualifiedReferenceExpression
@@ -230,48 +167,100 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                     if (callExpr?.methodIdentifier?.name == "contains") {
                         val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
 
+                        val callArgument = callExpr.valueArguments.firstOrNull()
+                        val quickFix =
+                            if (keysRead.mapExpression != null && callArgument != null) {
+                                fix().replace()
+                                    .imports("assertk.assertions.key")
+                                    .reformat(true)
+                                    .range(context.getLocation(parentExpr))
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(keysRead.mapExpression.sourcePsi!!.text)
+                                            append(").key(")
+
+                                            // For some reason KtLiteralStringTemplateEntry
+                                            // does not include string delimiters in its
+                                            // text
+                                            val keyExprPsi = callArgument.sourcePsi!!
+                                            if (
+                                                keyExprPsi
+                                                    is KtLiteralStringTemplateEntry
+                                            ) {
+                                                append('"')
+                                                append(keyExprPsi.text)
+                                                append('"')
+                                            } else {
+                                                append(keyExprPsi.text)
+                                            }
+                                            append(')')
+                                        },
+                                    )
+                                    .build()
+                            } else {
+                                null
+                            }
+
                         if (containingClassName == "assertk.assertions.IterableKt") {
                             context.report(
                                 KEYS_SET_PRESENT_ISSUE,
                                 node,
                                 context.getLocation(parentExpr),
                                 KEYS_SET_PRESENT_ISSUE.getBriefDescription(TextFormat.TEXT),
-                                quickfixData =
-                                    mapExpression?.let { mapExpr ->
-                                        callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
-                                            fix().replace()
-                                                .imports("assertk.assertions.key")
-                                                .reformat(true)
-                                                .range(context.getLocation(parentExpr))
-                                                .with(
-                                                    buildString {
-                                                        append("assertThat(")
-                                                        append(mapExpr.sourcePsi!!.text)
-                                                        append(").key(")
-
-                                                        // For some reason KtLiteralStringTemplateEntry
-                                                        // does not include string delimiters in its
-                                                        // text
-                                                        val keyExprPsi = keyExpr.sourcePsi!!
-                                                        if (
-                                                            keyExprPsi
-                                                                is KtLiteralStringTemplateEntry
-                                                        ) {
-                                                            append('"')
-                                                            append(keyExprPsi.text)
-                                                            append('"')
-                                                        } else {
-                                                            append(keyExprPsi.text)
-                                                        }
-                                                        append(')')
-                                                    },
-                                                )
-                                                .build()
-                                        }
-                                    },
+                                quickfixData = quickFix,
                             )
                         }
                     }
+                }
+            }
+
+            /**
+             * Returns the map expression being used as the receiver of a [Map.keys]
+             * or reference.
+             *
+             * **Note:** There's a workaround in place such that this works in property
+             * reference cases where the receiver expression is null in the UAST.
+             *
+             * @param expression the expression under consideration
+             * @return [KeysRead] if [expression] is a [Map.keys] read or reference,
+             * otherwise null
+             */
+            private fun getReceiverForKeysRead(
+                evaluator: JavaEvaluator,
+                expression: UExpression,
+            ): KeysRead? {
+                return when (expression) {
+                    is UCallableReferenceExpression -> {
+                        if (evaluator.isMapType(expression.qualifierType) &&
+                            expression.callableName == "keys"
+                        ) {
+                            // For some reason this is always null, otherwise we wouldn't
+                            // need the KeysRead type but could instead return the expression
+                            // to indicate this is an interesting expression.
+                            KeysRead(expression.qualifierExpression)
+                        } else {
+                            null
+                        }
+                    }
+
+                    is UQualifiedReferenceExpression -> {
+                        val call = expression.selector
+
+                        if (call is USimpleNameReferenceExpression) {
+                            if (evaluator.isMapType(expression.receiver.getExpressionType()) &&
+                                call.identifier == "keys"
+                            ) {
+                                KeysRead(expression.receiver)
+                            } else {
+                                null
+                            }
+                        } else {
+                            null
+                        }
+                    }
+
+                    else -> null
                 }
             }
 
@@ -297,6 +286,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                     implementsInterface(receiverType, "Map")
             }
         }
+
+    private data class KeysRead(val mapExpression: UExpression?)
 
     companion object {
         private val MAP_ACCESSOR_METHOD_NAMES =
