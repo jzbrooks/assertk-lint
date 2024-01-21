@@ -159,7 +159,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                                         // does not include string delimiters in its
                                                         // text
                                                         val keyExprPsi = keyExpr.sourcePsi!!
-                                                        if (keyExprPsi is KtLiteralStringTemplateEntry) {
+                                                        if (
+                                                            keyExprPsi is
+                                                                KtLiteralStringTemplateEntry
+                                                        ) {
                                                             append('"')
                                                             append(keyExprPsi.text)
                                                             append('"')
@@ -234,35 +237,38 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                 context.getLocation(parentExpr),
                                 KEYS_SET_PRESENT_ISSUE.getBriefDescription(TextFormat.TEXT),
                                 quickfixData =
-                                mapExpression?.let { mapExpr ->
-                                    callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
-                                        fix().replace()
-                                            .imports("assertk.assertions.key")
-                                            .reformat(true)
-                                            .range(context.getLocation(parentExpr))
-                                            .with(
-                                                buildString {
-                                                    append("assertThat(")
-                                                    append(mapExpr.sourcePsi!!.text)
-                                                    append(").key(")
+                                    mapExpression?.let { mapExpr ->
+                                        callExpr.valueArguments.firstOrNull()?.let { keyExpr ->
+                                            fix().replace()
+                                                .imports("assertk.assertions.key")
+                                                .reformat(true)
+                                                .range(context.getLocation(parentExpr))
+                                                .with(
+                                                    buildString {
+                                                        append("assertThat(")
+                                                        append(mapExpr.sourcePsi!!.text)
+                                                        append(").key(")
 
-                                                    // For some reason KtLiteralStringTemplateEntry
-                                                    // does not include string delimiters in its
-                                                    // text
-                                                    val keyExprPsi = keyExpr.sourcePsi!!
-                                                    if (keyExprPsi is KtLiteralStringTemplateEntry) {
-                                                        append('"')
-                                                        append(keyExprPsi.text)
-                                                        append('"')
-                                                    } else {
-                                                        append(keyExprPsi.text)
-                                                    }
-                                                    append(')')
-                                                },
-                                            )
-                                            .build()
-                                    }
-                                },
+                                                        // For some reason KtLiteralStringTemplateEntry
+                                                        // does not include string delimiters in its
+                                                        // text
+                                                        val keyExprPsi = keyExpr.sourcePsi!!
+                                                        if (
+                                                            keyExprPsi
+                                                                is KtLiteralStringTemplateEntry
+                                                        ) {
+                                                            append('"')
+                                                            append(keyExprPsi.text)
+                                                            append('"')
+                                                        } else {
+                                                            append(keyExprPsi.text)
+                                                        }
+                                                        append(')')
+                                                    },
+                                                )
+                                                .build()
+                                        }
+                                    },
                             )
                         }
                     }
@@ -349,10 +355,10 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 priority = 6,
                 severity = Severity.WARNING,
                 implementation =
-                Implementation(
-                    MapAssertionDetector::class.java,
-                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
-                ),
+                    Implementation(
+                        MapAssertionDetector::class.java,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                    ),
             )
     }
 }
