@@ -333,7 +333,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """
             package assertk
 
-            // This name is a hack to get the test infractructure to correctly
+            // This name is a hack to get the test infrastructure to correctly
             // name this test stub file's class to AssertkKt
             class Assert<T> {
 
@@ -360,7 +360,7 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """
             package assertk.assertions
 
-            // This name is a hack to get the test infractructure to correctly
+            // This name is a hack to get the test infrastructure to correctly
             // name this test stub file's class to AssertkKt
             class Iterable {
             }
