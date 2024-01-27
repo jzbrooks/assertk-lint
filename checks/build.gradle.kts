@@ -12,6 +12,7 @@ lint {
     ignoreTestSources = true
     warningsAsErrors = true
 
+    informational += "GradleDependency"
     disable += "JavaPluginLanguageLevel"
 }
 
