@@ -81,7 +81,7 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
             java(GOOGLE_TRUTH_STUB),
             java(ASSERTION_STUB),
         ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use asserk assertions [GoogleTruthUse]
+            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [GoogleTruthUse]
         assertThat(first).isEqualTo(second)
         ~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",

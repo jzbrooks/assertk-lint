@@ -33,7 +33,7 @@ class GoogleTruthDetector : Detector(), Detector.UastScanner {
                         ISSUE,
                         node,
                         context.getLocation(node),
-                        "Use asserk assertions",
+                        "Use assertk assertions",
                     )
                 }
             }

@@ -79,7 +79,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             kotlin(code),
             java(JUNIT_4_ASSERT_STUB),
         ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use asserk assertions [TestFrameworkAssertionUse]
+            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -108,7 +108,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             kotlin(code),
             java(JUNIT_5_ASSERT_STUB),
         ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use asserk assertions [TestFrameworkAssertionUse]
+            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -137,7 +137,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             kotlin(code),
             kotlin(KOTLIN_TEST_ASSERT_STUB),
         ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use asserk assertions [TestFrameworkAssertionUse]
+            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
