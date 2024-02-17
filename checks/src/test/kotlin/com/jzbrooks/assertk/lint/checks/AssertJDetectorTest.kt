@@ -81,7 +81,7 @@ class AssertJDetectorTest : LintDetectorTest() {
             java(ASSERTJ_STUB),
             java(ASSERTION_STUB),
         ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use asserk assertions [AssertJUse]
+            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [AssertJUse]
         assertThat(first).isEqualTo(second)
         ~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
