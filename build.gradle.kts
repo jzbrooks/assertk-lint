@@ -15,7 +15,7 @@ allprojects {
 
     configure<SpotlessExtension> {
         kotlinGradle {
-            ktlint("1.0.1")
+            ktlint("1.2.1")
             target("*.kts")
         }
     }
@@ -27,7 +27,7 @@ allprojects {
 
         configure<SpotlessExtension> {
             kotlin {
-                ktlint("1.0.1")
+                ktlint("1.2.1")
             }
         }
     }
