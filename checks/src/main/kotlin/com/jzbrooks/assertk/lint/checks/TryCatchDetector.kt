@@ -37,36 +37,38 @@ class TryCatchDetector : Detector(), SourceCodeScanner {
                 val catchBody = catchClause.body as? UBlockExpression ?: return
                 if (tryClause.expressions.isEmpty()) return
 
-                val assertkCatchAssertionCount =
-                    catchBody.expressions
-                        .filterIsInstance<UQualifiedReferenceExpression>()
-                        .count {
-                            val deepestReceiver = it.deepestReceiver
-
-                            deepestReceiver is UCallExpression &&
-                                deepestReceiver.methodName == "assertThat" &&
-                                context.evaluator.isMemberInClass(
-                                    deepestReceiver.resolve(),
-                                    "assertk.AssertKt",
-                                )
-                        }
-
                 val nonFailCallExpressionCount =
                     tryClause.expressions.count {
                         (it.skipParenthesizedExprDown() as? UCallExpression)?.methodName != "fail"
                     }
 
-                val catchBlockHasNoNonAssertionExpressions =
-                    catchBody.expressions.isEmpty() ||
-                        assertkCatchAssertionCount == catchBody.expressions.size
+                if (nonFailCallExpressionCount == 1) {
+                    val assertkCatchAssertionCount =
+                        catchBody.expressions
+                            .filterIsInstance<UQualifiedReferenceExpression>()
+                            .count {
+                                val deepestReceiver = it.deepestReceiver
 
-                if (nonFailCallExpressionCount == 1 && catchBlockHasNoNonAssertionExpressions) {
-                    context.report(
-                        ISSUE,
-                        node,
-                        context.getLocation(node),
-                        "Use assertk.assertFailure",
-                    )
+                                deepestReceiver is UCallExpression &&
+                                    deepestReceiver.methodName == "assertThat" &&
+                                    context.evaluator.isMemberInClass(
+                                        deepestReceiver.resolve(),
+                                        "assertk.AssertKt",
+                                    )
+                            }
+
+                    val onlyAssertsInCatchBlock =
+                        assertkCatchAssertionCount > 0 &&
+                            assertkCatchAssertionCount == catchBody.expressions.size
+
+                    if (onlyAssertsInCatchBlock) {
+                        context.report(
+                            ISSUE,
+                            node,
+                            context.getLocation(node),
+                            "Use assertk.assertFailure",
+                        )
+                    }
                 }
             }
         }

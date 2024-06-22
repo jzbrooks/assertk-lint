@@ -142,6 +142,33 @@ class TryCatchDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `assertion with empty catch block ignored`() {
+        val code =
+            """
+            package clean
+
+            import risky.RotatingDetonationEngine
+            import assertk.fail
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+            import assertk.assertions.prop
+
+            class Testing {
+                fun unreliableTest() {
+                    val engine = RotatingDetonationEngine()
+                    try {
+                        engine.rotate()
+                        fail()
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expectClean()
+    }
+
+    @Test
     fun `assertion with complicated catch block ignored`() {
         val code =
             """
