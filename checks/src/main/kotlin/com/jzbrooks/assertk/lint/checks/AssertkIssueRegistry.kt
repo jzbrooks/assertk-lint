@@ -13,6 +13,7 @@ class AssertkIssueRegistry : IssueRegistry() {
             MapAssertionDetector.KEYS_SET_ABSENT_ISSUE,
             MapAssertionDetector.KEYS_SET_PRESENT_ISSUE,
             TestFrameworkAssertionDetector.ISSUE,
+            TryCatchDetector.ISSUE,
             UnusedAssertionDetector.ISSUE,
         )
 
