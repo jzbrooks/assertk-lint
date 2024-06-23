@@ -1,5 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.diffplug.gradle.spotless.SpotlessPlugin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
@@ -22,7 +23,12 @@ allprojects {
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         configure<KotlinJvmProjectExtension> {
-            jvmToolchain(17)
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+        }
+
+        configure<JavaPluginExtension> {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
         }
 
         configure<SpotlessExtension> {
