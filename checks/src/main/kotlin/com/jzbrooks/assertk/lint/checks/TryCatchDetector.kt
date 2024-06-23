@@ -78,9 +78,7 @@ class TryCatchDetector : Detector(), SourceCodeScanner {
         val ISSUE: Issue =
             Issue.create(
                 id = "TryCatchAssertion",
-                briefDescription = """
-                    Use `assertk.assertFailure` for assertions on expected exceptions
-                    """,
+                briefDescription = "Use `assertFailure` for expected exceptions",
                 explanation = """
                     Assertions in catch blocks can be error prone because an explicit `fail` call must immediately follow the call in the try block. Note: This detector will not raise issues for complicated try/catch blocks since they may have some reason to exist beyond asserting on exception behavior.
                     """,
