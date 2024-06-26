@@ -45,7 +45,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY_SECRET }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew --no-configuration-cache publish
+        run: ./gradlew --no-configuration-cache publishAndReleaseToMavenCentral
 
       - name: Create Pull Request
         env:
