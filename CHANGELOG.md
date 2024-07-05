@@ -2,8 +2,23 @@
 
 ## Unreleased
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
 ### Fixed
-- _MapValueAssertion_ no longer raises issues on array indexing expressions as an `assertThat` argument
+
+### Security
+
+## 1.2.1 - 2024-07-05
+
+### Fixed
+
+- _MapValueAssertion_ no longer raises issues on array indexing expressions as an assertThat
 
 ## 1.2.0 - 2024-06-27
 
