@@ -60,8 +60,11 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 val mapValueRead =
                     when (argExpr) {
                         is UArrayAccessExpression -> {
-                            evaluator.isMapType(argExpr.receiver.getExpressionType())
-                            ValueRead(argExpr.receiver, argExpr.indices.firstOrNull())
+                            if (evaluator.isMapType(argExpr.receiver.getExpressionType())) {
+                                ValueRead(argExpr.receiver, argExpr.indices.firstOrNull())
+                            } else {
+                                null
+                            }
                         }
 
                         is UQualifiedReferenceExpression -> {

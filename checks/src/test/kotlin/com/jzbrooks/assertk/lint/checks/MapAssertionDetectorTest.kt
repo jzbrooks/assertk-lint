@@ -379,4 +379,26 @@ class MapAssertionDetectorTest : LintDetectorTest() {
             """.trimMargin(),
         )
     }
+
+    @Test
+    fun `array indexing reports clean`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.key
+            import assertk.assertions.isNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list: List<String?> = listOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4")
+                    assertThat(list[0]).isNotNull()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+    }
 }
