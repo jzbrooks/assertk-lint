@@ -23,7 +23,12 @@ allprojects {
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         configure<KotlinJvmProjectExtension> {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_17)
+                allWarningsAsErrors.set(
+                    !properties.containsKey("android.injected.invoked.from.ide"),
+                )
+            }
         }
 
         configure<JavaPluginExtension> {

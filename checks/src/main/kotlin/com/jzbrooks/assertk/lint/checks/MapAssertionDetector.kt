@@ -10,7 +10,6 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
-import com.android.tools.lint.detector.api.isJava
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
 import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
@@ -36,9 +35,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 get() = name == "assertThat" && containingClass?.qualifiedName == "assertk.AssertKt"
 
             override fun visitCallExpression(node: UCallExpression) {
-                // Avoid enforcing assertk use in java
-                // sources for mixed language codebases
-                if (isJava(node.javaPsi)) return
+                if (!node.isKotlin) return
+
                 val method = node.resolve() ?: return
 
                 val evaluator = context.evaluator

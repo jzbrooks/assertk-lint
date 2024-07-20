@@ -1,10 +1,17 @@
 package com.jzbrooks.assertk.lint.checks
 
+import com.android.tools.lint.detector.api.isKotlin
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.asRecursiveLogString
 import org.jetbrains.uast.skipParenthesizedExprDown
+
+val UExpression.isKotlin: Boolean
+    get() {
+        val sourcePsi = sourcePsi ?: return false
+        return isKotlin(sourcePsi.language)
+    }
 
 /**
  * Gets the receiver of the expression which is evaluated first at runtime.

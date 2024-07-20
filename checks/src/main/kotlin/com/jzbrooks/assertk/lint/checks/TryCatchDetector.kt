@@ -9,7 +9,6 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
-import com.android.tools.lint.detector.api.isJava
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
@@ -23,9 +22,7 @@ class TryCatchDetector : Detector(), SourceCodeScanner {
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
             override fun visitTryExpression(node: UTryExpression) {
-                // Avoid enforcing assertk use in java
-                // sources for mixed language codebases
-                if (isJava(node.javaPsi)) return
+                if (!node.isKotlin) return
 
                 // This errs on the conservative side since complicated try/catch
                 // blocks may have some reason for existing other than the

@@ -8,7 +8,6 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-import com.android.tools.lint.detector.api.isJava
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import java.util.EnumSet
@@ -32,9 +31,7 @@ class TestFrameworkAssertionDetector : Detector(), Detector.UastScanner {
                 )
 
             override fun visitCallExpression(node: UCallExpression) {
-                // Avoid enforcing assertk use in java
-                // sources for mixed language codebases
-                if (isJava(node.javaPsi)) return
+                if (!node.isKotlin) return
 
                 val psiMethod = node.resolve()
 
