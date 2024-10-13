@@ -1,17 +1,22 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.detector.api.isKotlin
+import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.asRecursiveLogString
 import org.jetbrains.uast.skipParenthesizedExprDown
 
-val UExpression.isKotlin: Boolean
+internal val UExpression.isKotlin: Boolean
     get() {
         val sourcePsi = sourcePsi ?: return false
         return isKotlin(sourcePsi.language)
     }
+
+// todo: can this be done with UAST?
+internal val PsiMethod.isAssertThat: Boolean
+    get() = name == "assertThat" && containingClass?.qualifiedName == "assertk.AssertKt"
 
 /**
  * Gets the receiver of the expression which is evaluated first at runtime.
@@ -34,7 +39,7 @@ val UExpression.isKotlin: Boolean
  *         ULiteralExpression (value = "Boom!")
  * ```
  */
-val UQualifiedReferenceExpression.deepestReceiver: UExpression
+internal val UQualifiedReferenceExpression.deepestReceiver: UExpression
     get() {
         var currentReceiver = receiver.skipParenthesizedExprDown()
         while (currentReceiver is UQualifiedReferenceExpression) {
