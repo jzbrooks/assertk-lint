@@ -4,7 +4,7 @@ androidLint = "31.7.0" # agp + 23.0.0
 changelog = "2.2.1"
 junit = "4.13.2"
 kotlin = "2.0.21"
-mavenPublish = "0.29.0"
+mavenPublish = "0.30.0"
 spotless = "6.25.0"
 
 [libraries]
