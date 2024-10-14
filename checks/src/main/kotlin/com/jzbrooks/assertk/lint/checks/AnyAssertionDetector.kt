@@ -31,29 +31,30 @@ class AnyAssertionDetector : Detector(), Detector.UastScanner {
                 val method = node.resolve() ?: return
 
                 if (method.isAssertThat) {
-                    for (argExpr in node.valueArguments) {
-                        val unwrappedExpression = argExpr.skipParenthesizedExprDown()
-                        if (unwrappedExpression is UBinaryExpression &&
+                    val binaryExprArg =
+                        node.valueArguments
+                            .map { it.skipParenthesizedExprDown() }
+                            .filterIsInstance<UBinaryExpression>()
+                    for (argExpr in binaryExprArg) {
+                        if (
                             (
-                                unwrappedExpression.operator == UastBinaryOperator.EQUALS ||
-                                    unwrappedExpression.operator == UastBinaryOperator.NOT_EQUALS
+                                argExpr.operator == UastBinaryOperator.EQUALS ||
+                                    argExpr.operator == UastBinaryOperator.NOT_EQUALS
+                            ) &&
+                            (
+                                (argExpr.leftOperand as? ULiteralExpression)?.isNull == true ||
+                                    (argExpr.rightOperand as? ULiteralExpression)?.isNull == true
                             )
                         ) {
-                            if ((unwrappedExpression.leftOperand as? ULiteralExpression)?.isNull ==
-                                true ||
-                                (unwrappedExpression.rightOperand as? ULiteralExpression)?.isNull ==
-                                true
-                            ) {
-                                context.report(
-                                    NULL_CHECK_ISSUE,
-                                    context.getCallLocation(
-                                        node,
-                                        includeReceiver = false,
-                                        includeArguments = true,
-                                    ),
-                                    NULL_CHECK_ISSUE.getBriefDescription(TextFormat.TEXT),
-                                )
-                            }
+                            context.report(
+                                NULL_CHECK_ISSUE,
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                                NULL_CHECK_ISSUE.getBriefDescription(TextFormat.TEXT),
+                            )
                         }
                     }
                 }
