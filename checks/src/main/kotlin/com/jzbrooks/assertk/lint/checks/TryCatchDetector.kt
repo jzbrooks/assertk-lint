@@ -16,7 +16,9 @@ import org.jetbrains.uast.UTryExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
-class TryCatchDetector : Detector(), SourceCodeScanner {
+class TryCatchDetector :
+    Detector(),
+    SourceCodeScanner {
     override fun getApplicableUastTypes() = listOf(UTryExpression::class.java)
 
     override fun createUastHandler(context: JavaContext) =

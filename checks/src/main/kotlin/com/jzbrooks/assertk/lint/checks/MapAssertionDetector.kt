@@ -23,7 +23,9 @@ import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.skipParenthesizedExprUp
 import java.util.EnumSet
 
-class MapAssertionDetector : Detector(), Detector.UastScanner {
+class MapAssertionDetector :
+    Detector(),
+    Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
         listOf(
             UCallExpression::class.java,
@@ -84,7 +86,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                 if (mapValueRead != null) {
                     val quickFix =
                         if (mapValueRead.keyExpression != null) {
-                            fix().replace()
+                            fix()
+                                .replace()
                                 .imports("assertk.assertions.key")
                                 .reformat(true)
                                 .range(context.getLocation(node))
@@ -96,8 +99,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                         appendKeyExpression(mapValueRead.keyExpression)
                                         append(')')
                                     },
-                                )
-                                .build()
+                                ).build()
                         } else {
                             null
                         }
@@ -131,7 +133,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                         val callArgument = callExpr.valueArguments.firstOrNull()
                         val quickFix =
                             if (keysRead.mapExpression != null && callArgument != null) {
-                                fix().replace()
+                                fix()
+                                    .replace()
                                     .imports("assertk.assertions.doesNotContainKey")
                                     .reformat(true)
                                     .range(context.getLocation(parentExpr))
@@ -143,8 +146,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                             appendKeyExpression(callArgument)
                                             append(')')
                                         },
-                                    )
-                                    .build()
+                                    ).build()
                             } else {
                                 null
                             }
@@ -181,7 +183,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                         val callArgument = callExpr.valueArguments.firstOrNull()
                         val quickFix =
                             if (keysRead.mapExpression != null && callArgument != null) {
-                                fix().replace()
+                                fix()
+                                    .replace()
                                     .imports("assertk.assertions.key")
                                     .reformat(true)
                                     .range(context.getLocation(parentExpr))
@@ -193,8 +196,7 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
                                             appendKeyExpression(callArgument)
                                             append(')')
                                         },
-                                    )
-                                    .build()
+                                    ).build()
                             } else {
                                 null
                             }
@@ -226,8 +228,8 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
             private fun getReceiverForKeysRead(
                 evaluator: JavaEvaluator,
                 expression: UExpression,
-            ): KeysRead? {
-                return when (expression) {
+            ): KeysRead? =
+                when (expression) {
                     is UCallableReferenceExpression -> {
                         if (evaluator.isMapType(expression.qualifierType) &&
                             expression.callableName == "keys"
@@ -257,7 +259,6 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
 
                     else -> null
                 }
-            }
 
             private fun StringBuilder.appendKeyExpression(expression: UExpression) {
                 // For some reason KtLiteralStringTemplateEntry
@@ -302,9 +303,14 @@ class MapAssertionDetector : Detector(), Detector.UastScanner {
     // For some reason the expression is always null in a callable ref scenario,
     // otherwise we wouldn't need the KeysRead type but could instead
     // return the expression to indicate this is an interesting expression.
-    private data class KeysRead(val mapExpression: UExpression?)
+    private data class KeysRead(
+        val mapExpression: UExpression?,
+    )
 
-    private data class ValueRead(val mapExpression: UExpression, val keyExpression: UExpression?)
+    private data class ValueRead(
+        val mapExpression: UExpression,
+        val keyExpression: UExpression?,
+    )
 
     companion object {
         private val MAP_ACCESSOR_METHOD_NAMES =

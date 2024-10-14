@@ -16,7 +16,9 @@ import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getParentOfType
 import java.util.EnumSet
 
-class UnusedAssertionDetector : Detector(), SourceCodeScanner {
+class UnusedAssertionDetector :
+    Detector(),
+    SourceCodeScanner {
     override fun getApplicableMethodNames(): List<String> = listOf("assertThat")
 
     override fun visitMethodCall(

@@ -51,11 +51,13 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(
-            java(code),
-            java(GOOGLE_TRUTH_STUB),
-            java(ASSERTION_STUB),
-        ).run().expectClean()
+        lint()
+            .files(
+                java(code),
+                java(GOOGLE_TRUTH_STUB),
+                java(ASSERTION_STUB),
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -76,16 +78,18 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(
-            kotlin(code),
-            java(GOOGLE_TRUTH_STUB),
-            java(ASSERTION_STUB),
-        ).run().expect(
-            """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [GoogleTruthUse]
+        lint()
+            .files(
+                kotlin(code),
+                java(GOOGLE_TRUTH_STUB),
+                java(ASSERTION_STUB),
+            ).run()
+            .expect(
+                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [GoogleTruthUse]
         assertThat(first).isEqualTo(second)
         ~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     companion object {

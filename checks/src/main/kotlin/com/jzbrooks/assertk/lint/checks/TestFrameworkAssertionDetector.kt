@@ -12,7 +12,9 @@ import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import java.util.EnumSet
 
-class TestFrameworkAssertionDetector : Detector(), Detector.UastScanner {
+class TestFrameworkAssertionDetector :
+    Detector(),
+    Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
         listOf(
             UCallExpression::class.java,
