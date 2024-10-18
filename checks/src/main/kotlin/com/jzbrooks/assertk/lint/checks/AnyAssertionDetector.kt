@@ -17,7 +17,9 @@ import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
-class AnyAssertionDetector : Detector(), Detector.UastScanner {
+class AnyAssertionDetector :
+    Detector(),
+    Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
         listOf(
             UCallExpression::class.java,
