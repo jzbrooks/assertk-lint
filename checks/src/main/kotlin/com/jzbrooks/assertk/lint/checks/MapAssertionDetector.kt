@@ -10,7 +10,6 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
 import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.uast.UArrayAccessExpression
@@ -33,9 +32,6 @@ class MapAssertionDetector :
 
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
-            private val PsiMethod.isAssertThat: Boolean
-                get() = name == "assertThat" && containingClass?.qualifiedName == "assertk.AssertKt"
-
             override fun visitCallExpression(node: UCallExpression) {
                 if (!node.isKotlin) return
 
