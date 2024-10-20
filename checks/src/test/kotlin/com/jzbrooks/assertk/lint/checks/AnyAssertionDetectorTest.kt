@@ -33,7 +33,7 @@ class AnyAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use Assert<Any?>.isNull or Assert<Any?>.isNotNull to assert against nullability [NullComparisonAssertion]
+            """src/clean/Testing.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(name == null).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -61,7 +61,7 @@ class AnyAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use Assert<Any?>.isNull or Assert<Any?>.isNotNull to assert against nullability [NullComparisonAssertion]
+            """src/clean/Testing.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(null == name).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -89,7 +89,7 @@ class AnyAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use Assert<Any?>.isNull or Assert<Any?>.isNotNull to assert against nullability [NullComparisonAssertion]
+            """src/clean/Testing.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(name != null).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
