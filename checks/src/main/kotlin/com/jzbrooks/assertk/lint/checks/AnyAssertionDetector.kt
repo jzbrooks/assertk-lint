@@ -180,12 +180,9 @@ class AnyAssertionDetector :
         val NULL_CHECK_ISSUE: Issue =
             Issue.create(
                 id = "NullComparisonAssertion",
-                briefDescription =
-                    "Use Assert<Any?>.isNull or " +
-                        "Assert<Any?>.isNotNull to assert against nullability",
+                briefDescription = "Use built-in nullability assertions",
                 explanation = """
-                    assertk provides `Assert.isNotNull: Assert` which asserts that the value is not null _and_ transforms the assertion subject into an assertion on the non-null type.
-                    It also provides `Assert.isNull` for a similar purpose.
+                    assertk provides `Assert.isNotNull: Assert` which asserts that the value is not null _and_ transforms the assertion subject into an assertion on the non-null type. It also provides `Assert.isNull` for a similar purpose.
                 """,
                 category = Category.USABILITY,
                 priority = 6,
