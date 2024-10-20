@@ -39,6 +39,14 @@ val assertkAssertionsStub =
 
     }
 
+    fun <T> Assert<T>.isTrue() {
+
+    }
+
+    fun <T> Assert<T>.isFalse() {
+
+    }
+
     fun <T : Any> Assert<Any>.isInstanceOf(clazz: KClass<T>): Assert<T> {
     }
     """.trimIndent()
