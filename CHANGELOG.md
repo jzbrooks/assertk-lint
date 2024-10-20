@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- _NullComparisonAssertion_ requires using assertk's `isNotNull` and `isNull` assertions for null assertions
+
 ## 1.2.1 - 2024-07-05
 
 ### Fixed
