@@ -71,6 +71,10 @@ val assertkCollectionStub =
     fun <T, U> Assert<Map<T, U>>.key(key: T): Assert<U> {
 
     }
+
+    fun <T> Assert<Array<T>>.index(index: Int): Assert<T> {
+
+    }
     """.trimIndent()
 
 val ASSERTK_STUBS =
