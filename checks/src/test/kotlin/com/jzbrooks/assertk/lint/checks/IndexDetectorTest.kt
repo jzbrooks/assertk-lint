@@ -209,4 +209,25 @@ class IndexDetectorTest : LintDetectorTest() {
             """.trimIndent(),
         )
     }
+
+    @Test
+    fun `quick fix does not break field read after index`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list = listOf(listOf(10, 100, 1_000), listOf(2, 4, 8))
+
+                    assertThat(list[1].sign).isEqualTo(1)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs("")
+    }
 }

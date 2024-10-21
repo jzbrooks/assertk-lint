@@ -68,6 +68,68 @@ class MapAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `get operator read from map in assertion subject creation fixed`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.key
+            import assertk.assertions.isNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, String?> = mapOf("9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to "John")
+
+                    assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """
+            Fix for src/clean/TestingTesting.kt line 12: Replace with assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4"):
+            @@ -12 +12
+            -         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).isNotNull()
+            +         assertThat(map).key("9A3E6FAC-0639-4F52-8E88-D9F7512540A4").isNotNull()
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun `get operator read from map of maps in assertion subject creation fixed`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val map: Map<String, Map<String, String?>> = mapOf(
+                        "9A3E6FAC-0639-4F52-8E88-D9F7512540A4" to mapOf(1, "John")
+                    )
+
+                    assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"][1]).isEqualTo("John")
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """
+            Fix for src/clean/TestingTesting.kt line 12: Replace with assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).key(1):
+            @@ -5 +5
+            + import assertk.assertions.key
+            @@ -12 +13
+            -         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"][1]).isEqualTo("John")
+            +         assertThat(map["9A3E6FAC-0639-4F52-8E88-D9F7512540A4"]).key(1).isEqualTo("John")
+            """.trimIndent(),
+        )
+    }
+
+    @Test
     fun `get operator read from map replaced with key`() {
         val code =
             """
