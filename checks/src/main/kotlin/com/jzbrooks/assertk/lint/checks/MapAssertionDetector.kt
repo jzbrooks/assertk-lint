@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiType
+import com.intellij.psi.util.InheritanceUtil
 import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.uast.UArrayAccessExpression
 import org.jetbrains.uast.UCallExpression
@@ -277,22 +278,11 @@ class MapAssertionDetector :
                 val type = psiType ?: return false
                 val receiverType = getTypeClass(type) ?: return false
 
-                // This is goofy, but since the actual underlying definition of
-                // kotlin's built-in map type is defined in the java standard
-                // library we can't check the interface list from that resolved
-                // type. We also can't assume that the receiver's concrete type
-                // is java.util.Map because anyone can implement kotlin's map
-                // interface.
-                //
-                // assertk's API surfaces kotlin's built-in map type, so
-                // Assert<Map<T, U>>.key(key: T): Assert<U> should work for
-                // any type that implements map.
-                //
-                // Unfortunately evaluator.implementsInterface does not return
-                // true if the first argument _is_ the interface (because interfaces
-                // can implement other interfaces).
-                return (receiverType.isInterface && receiverType.name == "Map") ||
-                    implementsInterface(receiverType, "Map")
+                return InheritanceUtil.isInheritorOrSelf(
+                    receiverType,
+                    findClass("java.util.Map"),
+                    true,
+                )
             }
         }
 

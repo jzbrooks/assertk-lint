@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiArrayType
+import com.intellij.psi.util.InheritanceUtil
 import org.jetbrains.uast.UArrayAccessExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
@@ -48,11 +49,18 @@ class IndexDetector :
             ) {
                 val indexExpr =
                     (argExpr as? UArrayAccessExpression)?.let { expr ->
+                        val type = expr.receiver.getExpressionType()
+                        val lastIndex = expr.indices.lastOrNull()
+
                         when {
-                            argExpr.receiver.getExpressionType() is PsiArrayType ->
-                                IndexExpr(argExpr.receiver, argExpr.indices.lastOrNull())
-                            evaluator.typeMatches(argExpr.receiver.getExpressionType(), "List") ->
-                                IndexExpr(argExpr.receiver, argExpr.indices.lastOrNull())
+                            type is PsiArrayType -> IndexExpr(expr.receiver, lastIndex)
+
+                            InheritanceUtil.isInheritorOrSelf(
+                                evaluator.getTypeClass(type),
+                                evaluator.findClass("java.util.List"),
+                                true,
+                            ) -> IndexExpr(expr.receiver, lastIndex)
+
                             else -> null
                         }
                     }

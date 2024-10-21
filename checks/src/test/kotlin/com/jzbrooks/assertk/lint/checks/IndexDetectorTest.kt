@@ -37,7 +37,7 @@ class IndexDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `index expression as subject is reported`() {
+    fun `array index expression as subject is reported`() {
         val code =
             """
             package clean
@@ -60,6 +60,64 @@ class IndexDetectorTest : LintDetectorTest() {
             src/clean/TestingTesting.kt:11: Warning: Index with assertk assertions [CollectionIndexAssertion]
                     assertThat(array[2]).isEqualTo(1_000)
                                ~~~~~~~~
+            0 errors, 1 warnings
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun `list index expression as subject is reported`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list = listOf(10, 100, 1_000)
+
+                    assertThat(list[2]).isEqualTo(1_000)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
+            """
+            src/clean/TestingTesting.kt:10: Warning: Index with assertk assertions [CollectionIndexAssertion]
+                    assertThat(list[2]).isEqualTo(1_000)
+                               ~~~~~~~
+            0 errors, 1 warnings
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun `list implementer index expression as subject is reported`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class CrazyWrapper(private val list: List<Int>): List<Int> by list
+
+            class TestingTesting {
+                fun testingTest() {
+                    val weirdList = CrazyWrapper(listOf(10, 100, 1_000))
+
+                    assertThat(weirdList[2]).isEqualTo(1_000)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
+            """
+            src/clean/CrazyWrapper.kt:12: Warning: Index with assertk assertions [CollectionIndexAssertion]
+                    assertThat(weirdList[2]).isEqualTo(1_000)
+                               ~~~~~~~~~~~~
             0 errors, 1 warnings
             """.trimIndent(),
         )
