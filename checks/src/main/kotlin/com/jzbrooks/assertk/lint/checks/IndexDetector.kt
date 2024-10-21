@@ -106,7 +106,7 @@ class IndexDetector :
         @JvmField
         val ISSUE: Issue =
             Issue.create(
-                id = "CollectionIndexAssertion",
+                id = "UseIndexAssertion",
                 briefDescription = "Index with assertk assertions",
                 explanation = """
                     assertk provides `Assert.index(i): Assert<T>` (and similar methods on assertion subjects like `Assert.first()` which asserts that the value is present _and_ transforms the assertion subject into an assertion on the value type.

@@ -57,7 +57,7 @@ class IndexDetectorTest : LintDetectorTest() {
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
             """
-            src/clean/TestingTesting.kt:11: Warning: Index with assertk assertions [CollectionIndexAssertion]
+            src/clean/TestingTesting.kt:11: Warning: Index with assertk assertions [UseIndexAssertion]
                     assertThat(array[2]).isEqualTo(1_000)
                                ~~~~~~~~
             0 errors, 1 warnings
@@ -85,7 +85,7 @@ class IndexDetectorTest : LintDetectorTest() {
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
             """
-            src/clean/TestingTesting.kt:10: Warning: Index with assertk assertions [CollectionIndexAssertion]
+            src/clean/TestingTesting.kt:10: Warning: Index with assertk assertions [UseIndexAssertion]
                     assertThat(list[2]).isEqualTo(1_000)
                                ~~~~~~~
             0 errors, 1 warnings
@@ -115,7 +115,7 @@ class IndexDetectorTest : LintDetectorTest() {
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
             """
-            src/clean/CrazyWrapper.kt:12: Warning: Index with assertk assertions [CollectionIndexAssertion]
+            src/clean/CrazyWrapper.kt:12: Warning: Index with assertk assertions [UseIndexAssertion]
                     assertThat(weirdList[2]).isEqualTo(1_000)
                                ~~~~~~~~~~~~
             0 errors, 1 warnings
