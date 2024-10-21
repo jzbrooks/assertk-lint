@@ -11,7 +11,7 @@ class IndexDetectorTest : LintDetectorTest() {
 
     override fun getIssues() =
         listOf(
-            IndexDetector.INDEX_IN_ASSERT_THAT,
+            IndexDetector.ISSUE,
         )
 
     @Test

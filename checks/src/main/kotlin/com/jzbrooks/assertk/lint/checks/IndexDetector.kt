@@ -79,10 +79,10 @@ class IndexDetector :
                         }
 
                     context.report(
-                        INDEX_IN_ASSERT_THAT,
+                        ISSUE,
                         node,
                         context.getLocation(argExpr),
-                        INDEX_IN_ASSERT_THAT.getBriefDescription(TextFormat.TEXT),
+                        ISSUE.getBriefDescription(TextFormat.TEXT),
                         quickfixData = quickFix,
                     )
                 }
@@ -96,7 +96,7 @@ class IndexDetector :
 
     companion object {
         @JvmField
-        val INDEX_IN_ASSERT_THAT: Issue =
+        val ISSUE: Issue =
             Issue.create(
                 id = "CollectionIndexAssertion",
                 briefDescription = "Index with assertk assertions",
