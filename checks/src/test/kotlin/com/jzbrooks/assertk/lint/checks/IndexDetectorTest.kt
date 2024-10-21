@@ -122,4 +122,33 @@ class IndexDetectorTest : LintDetectorTest() {
             """.trimIndent(),
         )
     }
+
+    @Test
+    fun `array index expression as subject is fixed`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.index
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val array = arrayOf(10, 100, 1_000)
+
+                    assertThat(array[2]).isEqualTo(1_000)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """
+Fix for src/clean/TestingTesting.kt line 11: Replace with assertThat(array).index(2):
+@@ -11 +11
+-         assertThat(array[2]).isEqualTo(1_000)
++         assertThat(array).index(2).isEqualTo(1_000)
+            """.trimIndent(),
+        )
+    }
 }
