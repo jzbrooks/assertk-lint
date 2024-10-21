@@ -7,6 +7,7 @@ import com.android.tools.lint.detector.api.CURRENT_API
 class AssertkIssueRegistry : IssueRegistry() {
     override val issues =
         listOf(
+            AnyAssertionDetector.ISSUE,
             AssertJDetector.ISSUE,
             GoogleTruthDetector.ISSUE,
             MapAssertionDetector.DIRECT_READ_ISSUE,

@@ -49,13 +49,13 @@ class AnyAssertionDetector :
                     for (argExpr in binaryExprArg) {
                         if (argExpr.isNullComparisonExpr) {
                             context.report(
-                                NULL_CHECK_ISSUE,
+                                ISSUE,
                                 context.getCallLocation(
                                     node,
                                     includeReceiver = false,
                                     includeArguments = true,
                                 ),
-                                NULL_CHECK_ISSUE.getBriefDescription(TextFormat.TEXT),
+                                ISSUE.getBriefDescription(TextFormat.TEXT),
                                 getQuickFix(argExpr),
                             )
                         }
@@ -177,7 +177,7 @@ class AnyAssertionDetector :
 
     companion object {
         @JvmField
-        val NULL_CHECK_ISSUE: Issue =
+        val ISSUE: Issue =
             Issue.create(
                 id = "NullComparisonAssertion",
                 briefDescription = "Use built-in nullability assertions",

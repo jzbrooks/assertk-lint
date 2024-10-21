@@ -10,7 +10,7 @@ import org.junit.runners.JUnit4
 class AnyAssertionDetectorTest : LintDetectorTest() {
     override fun getDetector(): Detector = AnyAssertionDetector()
 
-    override fun getIssues() = listOf(AnyAssertionDetector.NULL_CHECK_ISSUE)
+    override fun getIssues() = listOf(AnyAssertionDetector.ISSUE)
 
     @Test
     fun `null check in assertThat detected`() {
