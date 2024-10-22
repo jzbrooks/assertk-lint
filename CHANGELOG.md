@@ -4,6 +4,20 @@
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 1.3.0 - 2024-10-22
+
+### Added
+
 - _NullComparisonAssertion_ requires using assertk's `isNotNull` and `isNull` assertions for null assertions
 - _UseIndexAssertion_ requires using assertk's indexing assertions (`index`, `first`, etc) to make assertions on a particular array or list value
 
