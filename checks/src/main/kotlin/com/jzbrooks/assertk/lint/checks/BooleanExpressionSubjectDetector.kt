@@ -75,6 +75,7 @@ class BooleanExpressionSubjectDetector :
                                         includeArguments = true,
                                     ),
                                     EQUALITY_EXPR_ISSUE.getBriefDescription(TextFormat.TEXT),
+                                    buildEqualExprQuickFix(argExpr),
                                 )
                         }
                     }
@@ -192,14 +193,25 @@ class BooleanExpressionSubjectDetector :
                 }
             }
 
-            private fun buildIsEqualToExprQuickFix(equalityExpr: UBinaryExpression): LintFix? {
-                val assertThatExprReplacement =
-                    fix()
-                        .replace()
-                        .range(context.getLocation(equalityExpr))
-                        .with(equalityExpr.leftOperand.sourcePsi!!.text)
-                        .reformat(true)
-                        .build()
+            private fun buildEqualExprQuickFix(equalityExpr: UBinaryExpression): LintFix? {
+                val (assertThatExprReplacement, expectsExpr) =
+                    when {
+                        equalityExpr.leftOperand.isLiteralOrStringTemplate ->
+                            fix()
+                                .replace()
+                                .range(context.getLocation(equalityExpr))
+                                .with(equalityExpr.rightOperand.sourcePsi!!.text)
+                                .reformat(true)
+                                .build() to equalityExpr.leftOperand
+
+                        else ->
+                            fix()
+                                .replace()
+                                .range(context.getLocation(equalityExpr))
+                                .with(equalityExpr.leftOperand.sourcePsi!!.text)
+                                .reformat(true)
+                                .build() to equalityExpr.rightOperand
+                    }
 
                 val assertionCall =
                     equalityExpr
@@ -221,7 +233,7 @@ class BooleanExpressionSubjectDetector :
                                                     includeArguments = true,
                                                 ),
                                             ).with(
-                                                "isEqualTo(${equalityExpr.rightOperand.sourcePsi!!.text})",
+                                                "isEqualTo(${expectsExpr.sourcePsi!!.text})",
                                             ).imports("assertk.assertions.isEqualTo")
                                             .reformat(true)
                                             .build()
@@ -235,7 +247,7 @@ class BooleanExpressionSubjectDetector :
                                                     includeArguments = true,
                                                 ),
                                             ).with(
-                                                "isNotEqualTo(${equalityExpr.rightOperand.sourcePsi!!.text})",
+                                                "isNotEqualTo(${expectsExpr.sourcePsi!!.text})",
                                             ).imports("assertk.assertions.isNotEqualTo")
                                             .reformat(true)
                                             .build()
@@ -257,8 +269,8 @@ class BooleanExpressionSubjectDetector :
                                                     includeArguments = true,
                                                 ),
                                             ).with(
-                                                "isEqualTo(${equalityExpr.rightOperand.sourcePsi!!.text})",
-                                            ).imports("assertk.assertions.isEqualTo")
+                                                "isNotEqualTo(${expectsExpr.sourcePsi!!.text})",
+                                            ).imports("assertk.assertions.isNotEqualTo")
                                             .reformat(true)
                                             .build()
                                     "isFalse" ->
@@ -271,7 +283,7 @@ class BooleanExpressionSubjectDetector :
                                                     includeArguments = true,
                                                 ),
                                             ).with(
-                                                "isEqualTo(${equalityExpr.rightOperand.sourcePsi!!.text})",
+                                                "isEqualTo(${expectsExpr.sourcePsi!!.text})",
                                             ).imports("assertk.assertions.isEqualTo")
                                             .reformat(true)
                                             .build()

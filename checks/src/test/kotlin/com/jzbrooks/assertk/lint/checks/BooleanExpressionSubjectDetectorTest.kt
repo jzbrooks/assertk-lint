@@ -269,4 +269,193 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
 0 errors, 1 warnings""",
         )
     }
+
+    @Test
+    fun `quick fix applied for not equals isTrue`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name != "Test").isTrue()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -4 +4
++ import assertk.assertions.isNotEqualTo
+@@ -9 +10
+-         assertThat(name != "Test").isTrue()
++         assertThat(name).isNotEqualTo("Test")""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for equals isTrue`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name == "Test").isTrue()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -4 +4
++ import assertk.assertions.isEqualTo
+@@ -9 +10
+-         assertThat(name == "Test").isTrue()
++         assertThat(name).isEqualTo("Test")""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for not equals isFalse`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isFalse
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name != "Test").isFalse()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -5 +5
++ import assertk.assertions.isEqualTo
+@@ -9 +10
+-         assertThat(name != "Test").isFalse()
++         assertThat(name).isEqualTo("Test")""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for equals isFalse`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isFalse
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name == "Test").isFalse()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -5 +5
++ import assertk.assertions.isNotEqualTo
+@@ -9 +10
+-         assertThat(name == "Test").isFalse()
++         assertThat(name).isNotEqualTo("Test")""",
+        )
+    }
+
+    @Test
+    fun `quick fix finds literal for assertion argument`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat("Test" == name).isTrue()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -4 +4
++ import assertk.assertions.isEqualTo
+@@ -9 +10
+-         assertThat("Test" == name).isTrue()
++         assertThat(name).isEqualTo("Test")""",
+        )
+    }
+
+    @Test
+    fun `quick fix treats string template as literal for assertion argument`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat("Test ${'$'}{System.identityHashCode(name)}" == name).isTrue()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -4 +4
++ import assertk.assertions.isEqualTo
+@@ -9 +10
+-         assertThat("Test ${'$'}{System.identityHashCode(name)}" == name).isTrue()
++         assertThat(name).isEqualTo("Test ${'$'}{System.identityHashCode(name)}")""",
+        )
+    }
+
+    @Test
+    fun `quick fix handles complex binary operator expressions`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(System.identityHashCode(name) == (0..10).random()).isTrue()
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+@@ -4 +4
++ import assertk.assertions.isEqualTo
+@@ -9 +10
+-         assertThat(System.identityHashCode(name) == (0..10).random()).isTrue()
++         assertThat(System.identityHashCode(name)).isEqualTo((0..10).random())""",
+        )
+    }
 }
