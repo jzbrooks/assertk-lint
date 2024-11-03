@@ -21,7 +21,7 @@ import org.jetbrains.uast.isNullLiteral
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
-class AnyAssertionDetector :
+class BooleanExpressionSubjectDetector :
     Detector(),
     Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
@@ -36,6 +36,11 @@ class AnyAssertionDetector :
                     operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
                         (leftOperand.isNullLiteral() || rightOperand.isNullLiteral())
 
+            private val UBinaryExpression.isEqualityComparisonExpr: Boolean
+                get() =
+                    operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
+                        (!leftOperand.isNullLiteral() && !rightOperand.isNullLiteral())
+
             override fun visitCallExpression(node: UCallExpression) {
                 if (!node.isKotlin) return
 
@@ -46,24 +51,38 @@ class AnyAssertionDetector :
                         node.valueArguments
                             .map { it.skipParenthesizedExprDown() }
                             .filterIsInstance<UBinaryExpression>()
+
                     for (argExpr in binaryExprArg) {
-                        if (argExpr.isNullComparisonExpr) {
-                            context.report(
-                                ISSUE,
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                                ISSUE.getBriefDescription(TextFormat.TEXT),
-                                getQuickFix(argExpr),
-                            )
+                        when {
+                            argExpr.isNullComparisonExpr ->
+                                context.report(
+                                    NULL_EXPR_ISSUE,
+                                    context.getCallLocation(
+                                        node,
+                                        includeReceiver = false,
+                                        includeArguments = true,
+                                    ),
+                                    NULL_EXPR_ISSUE.getBriefDescription(TextFormat.TEXT),
+                                    buildNullExprQuickFix(argExpr),
+                                )
+
+                            argExpr.isEqualityComparisonExpr ->
+                                context.report(
+                                    EQUALITY_EXPR_ISSUE,
+                                    context.getCallLocation(
+                                        node,
+                                        includeReceiver = false,
+                                        includeArguments = true,
+                                    ),
+                                    EQUALITY_EXPR_ISSUE.getBriefDescription(TextFormat.TEXT),
+                                    buildEqualExprQuickFix(argExpr),
+                                )
                         }
                     }
                 }
             }
 
-            private fun getQuickFix(nullCheckExpr: UBinaryExpression): LintFix? {
+            private fun buildNullExprQuickFix(nullCheckExpr: UBinaryExpression): LintFix? {
                 val assertThatExprReplacement =
                     when {
                         (nullCheckExpr.leftOperand as? ULiteralExpression)?.isNull == true -> {
@@ -173,11 +192,122 @@ class AnyAssertionDetector :
                     null
                 }
             }
+
+            private fun buildEqualExprQuickFix(equalityExpr: UBinaryExpression): LintFix? {
+                val (assertThatExprReplacement, expectsExpr) =
+                    when {
+                        equalityExpr.leftOperand.isLiteralOrStringTemplate ->
+                            fix()
+                                .replace()
+                                .range(context.getLocation(equalityExpr))
+                                .with(equalityExpr.rightOperand.sourcePsi!!.text)
+                                .reformat(true)
+                                .build() to equalityExpr.leftOperand
+
+                        else ->
+                            fix()
+                                .replace()
+                                .range(context.getLocation(equalityExpr))
+                                .with(equalityExpr.leftOperand.sourcePsi!!.text)
+                                .reformat(true)
+                                .build() to equalityExpr.rightOperand
+                    }
+
+                val assertionCall =
+                    equalityExpr
+                        .getParentOfType<UQualifiedReferenceExpression>()
+                        ?.selector as? UCallExpression
+
+                val assertionReplacement =
+                    when (equalityExpr.operator) {
+                        UastBinaryOperator.EQUALS -> {
+                            assertionCall?.let { call ->
+                                when (call.methodIdentifier?.name) {
+                                    "isTrue" ->
+                                        fix()
+                                            .replace()
+                                            .range(
+                                                context.getCallLocation(
+                                                    call,
+                                                    includeReceiver = false,
+                                                    includeArguments = true,
+                                                ),
+                                            ).with(
+                                                "isEqualTo(${expectsExpr.sourcePsi!!.text})",
+                                            ).imports("assertk.assertions.isEqualTo")
+                                            .reformat(true)
+                                            .build()
+                                    "isFalse" ->
+                                        fix()
+                                            .replace()
+                                            .range(
+                                                context.getCallLocation(
+                                                    call,
+                                                    includeReceiver = false,
+                                                    includeArguments = true,
+                                                ),
+                                            ).with(
+                                                "isNotEqualTo(${expectsExpr.sourcePsi!!.text})",
+                                            ).imports("assertk.assertions.isNotEqualTo")
+                                            .reformat(true)
+                                            .build()
+                                    else -> null
+                                }
+                            }
+                        }
+
+                        UastBinaryOperator.NOT_EQUALS -> {
+                            assertionCall?.let { call ->
+                                when (call.methodIdentifier?.name) {
+                                    "isTrue" ->
+                                        fix()
+                                            .replace()
+                                            .range(
+                                                context.getCallLocation(
+                                                    call,
+                                                    includeReceiver = false,
+                                                    includeArguments = true,
+                                                ),
+                                            ).with(
+                                                "isNotEqualTo(${expectsExpr.sourcePsi!!.text})",
+                                            ).imports("assertk.assertions.isNotEqualTo")
+                                            .reformat(true)
+                                            .build()
+                                    "isFalse" ->
+                                        fix()
+                                            .replace()
+                                            .range(
+                                                context.getCallLocation(
+                                                    call,
+                                                    includeReceiver = false,
+                                                    includeArguments = true,
+                                                ),
+                                            ).with(
+                                                "isEqualTo(${expectsExpr.sourcePsi!!.text})",
+                                            ).imports("assertk.assertions.isEqualTo")
+                                            .reformat(true)
+                                            .build()
+                                    else -> null
+                                }
+                            }
+                        }
+
+                        else -> null
+                    }
+
+                return if (assertionReplacement != null) {
+                    fix()
+                        .name("Replace equality check with equality assertion")
+                        .composite(assertThatExprReplacement, assertionReplacement)
+                } else {
+                    null
+                }
+            }
         }
 
     companion object {
         @JvmField
-        val ISSUE: Issue =
+        val NULL_EXPR_ISSUE: Issue =
             Issue.create(
                 id = "NullComparisonAssertion",
                 briefDescription = "Use built-in nullability assertions",
@@ -189,7 +319,25 @@ class AnyAssertionDetector :
                 severity = Severity.WARNING,
                 implementation =
                     Implementation(
-                        AnyAssertionDetector::class.java,
+                        BooleanExpressionSubjectDetector::class.java,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                    ),
+            )
+
+        @JvmField
+        val EQUALITY_EXPR_ISSUE: Issue =
+            Issue.create(
+                id = "EqualityComparisonAssertion",
+                briefDescription = "Use equality assertions",
+                explanation = """
+                    assertk provides `Assert.isEqualTo`, `Assert.isNotEqualTo`, and `Assert.isDataClassEqualTo`
+                """,
+                category = Category.USABILITY,
+                priority = 6,
+                severity = Severity.WARNING,
+                implementation =
+                    Implementation(
+                        BooleanExpressionSubjectDetector::class.java,
                         EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
                     ),
             )

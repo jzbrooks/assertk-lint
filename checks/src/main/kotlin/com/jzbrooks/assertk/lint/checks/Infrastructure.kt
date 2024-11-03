@@ -4,8 +4,10 @@ import com.android.tools.lint.detector.api.isKotlin
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.asRecursiveLogString
+import org.jetbrains.uast.expressions.UInjectionHost
 import org.jetbrains.uast.skipParenthesizedExprDown
 
 internal val UExpression.isKotlin: Boolean
@@ -17,6 +19,9 @@ internal val UExpression.isKotlin: Boolean
 // todo: can this be done with UAST?
 internal val PsiMethod.isAssertThat: Boolean
     get() = name == "assertThat" && containingClass?.qualifiedName == "assertk.AssertKt"
+
+internal val UExpression.isLiteralOrStringTemplate
+    get() = this is ULiteralExpression || (this is UInjectionHost && isString)
 
 /**
  * Gets the receiver of the expression which is evaluated first at runtime.
