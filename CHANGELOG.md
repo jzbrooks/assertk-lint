@@ -14,6 +14,8 @@
 
 ### Fixed
 
+- _UnusedAssertkAssertion_ flags _used_ assertion subjects in lambda expressions
+
 ### Security
 
 ## 1.3.0 - 2024-10-22
