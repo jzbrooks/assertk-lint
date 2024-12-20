@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getParentOfType
 import java.util.EnumSet
@@ -38,14 +39,19 @@ class UnusedAssertionDetector :
                     }
                 }
 
-            val parentMethod = node.getParentOfType(UMethod::class.java)
-            parentMethod?.accept(visitor)
+            val uElement =
+                node.getParentOfType(true, UMethod::class.java, ULambdaExpression::class.java)
+            uElement?.accept(visitor)
 
             if (!usedAsReceiver) {
                 context.report(
                     ISSUE,
                     node,
-                    context.getCallLocation(node, true, true),
+                    context.getCallLocation(
+                        call = node,
+                        includeReceiver = true,
+                        includeArguments = true,
+                    ),
                     ISSUE.getBriefDescription(TextFormat.TEXT),
                 )
             }
