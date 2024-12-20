@@ -12,6 +12,47 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
     override fun getIssues() = listOf(UnusedAssertionDetector.ISSUE)
 
     @Test
+    fun `subjects with assertions inside lambdas should report clean`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.isEqualTo
+
+            enum class Scenario(assertion: () -> Unit) {
+                LambdaAssertionScenario(assertion = { assertThat("").isNotNull() })
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub)).run().expectClean()
+    }
+
+    @Test
+    fun `subjects without assertions inside lambdas should be detected`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.isEqualTo
+
+            enum class Scenario(assertion: () -> Unit) {
+                LambdaAssertionScenario(assertion = { assertThat("") })
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), kotlin(assertkStub)).run().expect(
+            """src/clean/Scenario.kt:8: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
+    LambdaAssertionScenario(assertion = { assertThat("") })
+                                          ~~~~~~~~~~~~~~
+1 errors, 0 warnings""",
+        )
+    }
+
+    @Test
     fun `no issues reports clean`() {
         val code =
             """
