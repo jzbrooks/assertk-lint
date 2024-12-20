@@ -16,6 +16,11 @@ lint {
     disable += "JavaPluginLanguageLevel"
 }
 
+tasks.test {
+    jvmArgs("-Djava.awt.headless=true")
+    maxParallelForks = Runtime.getRuntime().availableProcessors() * 2
+}
+
 dependencies {
     compileOnly(libs.bundles.lint.api)
     testImplementation(libs.bundles.lint.tests)

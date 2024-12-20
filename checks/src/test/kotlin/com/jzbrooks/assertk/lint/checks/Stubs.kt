@@ -4,23 +4,22 @@ import com.android.tools.lint.checks.infrastructure.LintDetectorTest.kotlin
 
 val assertkStub =
     """
-     package assertk
+    @file:JvmName("AssertKt")
+    package assertk
 
-     import java.lang.AssertionError
+    import java.lang.AssertionError
 
-    // This name is a hack to get the test infrastructure to correctly
-     // name this test stub file's class to AssertkKt
-     class Assert<T> {
+    class Assert<T> {
 
-     }
+    }
 
-     fun <T> assertThat(subject: T?): Assert<T> {
+    fun <T> assertThat(subject: T?): Assert<T> {
 
-     }
+    }
 
-     fun fail() {
-         throw AssertionError("fail!")
-     }
+    fun fail() {
+        throw AssertionError("fail!")
+    }
     """.trimIndent()
 
 val assertkAssertionsStub =
@@ -46,19 +45,12 @@ val assertkAssertionsStub =
     fun <T> Assert<T>.isFalse() {
 
     }
-
-    fun <T : Any> Assert<Any>.isInstanceOf(clazz: KClass<T>): Assert<T> {
-    }
     """.trimIndent()
 
 val assertkCollectionStub =
     """
+    @file:JvmName("IterableKt")
     package assertk.assertions
-
-    // This name is a hack to get the test infrastructure to correctly
-    // name this test stub file's class to AssertkKt
-    class Iterable {
-    }
 
     fun <T> Assert<Iterable<T>>.doesNotContain(value: T) {
 
@@ -77,5 +69,31 @@ val assertkCollectionStub =
     }
     """.trimIndent()
 
+val assertkAnyStub =
+    """
+    @file:JvmName("AnyKt")
+    package assertk.assertions
+
+    inline fun <reified T : Any> Assert<Any?>.isInstanceOf(): Assert<T> = isInstanceOf(T::class)
+
+    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: KClass<T>): Assert<T> {
+    }
+    """.trimIndent()
+
+val assertkAnyJvmStub =
+    """
+    @file:JvmName("AnyJVMKt")
+    package assertk.assertions
+
+    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: Class<T>): Assert<T> {
+    }
+    """.trimIndent()
+
 val ASSERTK_STUBS =
-    arrayOf(kotlin(assertkStub), kotlin(assertkAssertionsStub), kotlin(assertkCollectionStub))
+    arrayOf(
+        kotlin(assertkStub),
+        kotlin(assertkAssertionsStub),
+        kotlin(assertkCollectionStub),
+        kotlin(assertkAnyStub),
+        kotlin(assertkAnyJvmStub),
+    )
