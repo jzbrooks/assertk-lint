@@ -15,7 +15,28 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
         )
 
     @Test
-    fun `index assertion reports clean`() {
+    fun `hasSize assertion reports clean`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.hasSize
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list: List<Int> = listOf(10, 100, 1_000)
+
+                    assertThat(list).hasSize(3)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+    }
+
+    @Test
+    fun `size property read is detected`() {
         val code =
             """
             package clean
@@ -32,6 +53,11 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
+            """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
+        assertThat(list.size).isEqualTo(3)
+        ~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+        )
     }
 }

@@ -10,15 +10,15 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.util.InheritanceUtil
-import com.intellij.psi.util.PsiUtil
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
-import org.jetbrains.uast.asRecursiveLogString
 import java.util.EnumSet
 
-class CollectionAssertionDetector : Detector(), Detector.UastScanner {
+class CollectionAssertionDetector :
+    Detector(),
+    Detector.UastScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
         listOf(
             UCallExpression::class.java,
@@ -34,12 +34,15 @@ class CollectionAssertionDetector : Detector(), Detector.UastScanner {
                 val evaluator = context.evaluator
 
                 if (method.isAssertThat) {
-                    val propertyAccessExpr = node.valueArguments.firstOrNull()
-                        as? UQualifiedReferenceExpression ?: return
+                    val propertyAccessExpr =
+                        node.valueArguments.firstOrNull()
+                            as? UQualifiedReferenceExpression ?: return
 
-                    val propertyReadExpr = propertyAccessExpr.selector as? USimpleNameReferenceExpression
+                    val propertyReadExpr =
+                        propertyAccessExpr.selector
+                            as? USimpleNameReferenceExpression ?: return
 
-                    if (propertyReadExpr?.resolvedName == "size" &&
+                    if (propertyReadExpr.resolvedName == "size" &&
                         InheritanceUtil.isInheritorOrSelf(
                             evaluator.getTypeClass(propertyAccessExpr.receiver.getExpressionType()),
                             evaluator.findClass("java.util.Collection"),
@@ -56,6 +59,7 @@ class CollectionAssertionDetector : Detector(), Detector.UastScanner {
                 }
             }
         }
+
     companion object {
         @JvmField
         val SIZE_READ_ISSUE: Issue =
@@ -69,10 +73,10 @@ class CollectionAssertionDetector : Detector(), Detector.UastScanner {
                 priority = 4,
                 severity = Severity.WARNING,
                 implementation =
-                Implementation(
-                    CollectionAssertionDetector::class.java,
-                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
-                ),
+                    Implementation(
+                        CollectionAssertionDetector::class.java,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                    ),
             )
     }
 }

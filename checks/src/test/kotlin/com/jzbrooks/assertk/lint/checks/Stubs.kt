@@ -103,6 +103,7 @@ val ASSERTK_STUBS =
     arrayOf(
         kotlin(assertkStub),
         kotlin(assertkAssertionsStub),
+        kotlin(assertkCollectionStub),
         kotlin(assertkIterableStub),
         kotlin(assertkAnyStub),
         kotlin(assertkAnyJvmStub),
