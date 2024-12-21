@@ -47,7 +47,7 @@ val assertkAssertionsStub =
     }
     """.trimIndent()
 
-val assertkCollectionStub =
+val assertkIterableStub =
     """
     @file:JvmName("IterableKt")
     package assertk.assertions
@@ -65,6 +65,16 @@ val assertkCollectionStub =
     }
 
     fun <T> Assert<Array<T>>.index(index: Int): Assert<T> {
+
+    }
+    """.trimIndent()
+
+val assertkCollectionStub =
+    """
+    @file:JvmName("CollectionKt")
+    package assertk.assertions
+
+    fun Assert<Collection<*>>.hasSize(value: Int) {
 
     }
     """.trimIndent()
@@ -94,6 +104,7 @@ val ASSERTK_STUBS =
         kotlin(assertkStub),
         kotlin(assertkAssertionsStub),
         kotlin(assertkCollectionStub),
+        kotlin(assertkIterableStub),
         kotlin(assertkAnyStub),
         kotlin(assertkAnyJvmStub),
     )
