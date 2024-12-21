@@ -5,6 +5,7 @@
 ### Added
 
 - _EqualityComparisonAssertion_ prohibits equality expression in `assertThat`
+- _CollectionSizeAssertion_ prohibits `Collection.size` reads in `assertThat`
 
 ### Changed
 
