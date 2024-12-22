@@ -109,4 +109,62 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
     }
+
+    @Test
+    fun `size property read is fixed`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list: List<Int> = listOf(10, 100, 1_000)
+
+                    assertThat(list.size).isEqualTo(3)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/TestingTesting.kt line 10: Replace with assertThat(list).hasSize(3):
+@@ -4 +4
++ import assertk.assertions.hasSize
+@@ -10 +11
+-         assertThat(list.size).isEqualTo(3)
++         assertThat(list).hasSize(3)""",
+        )
+    }
+
+    @Test
+    fun `indirect size property read is fixed`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            data class TestSubjectHolder(val list: List<Int>)
+
+            class TestingTesting {
+                fun testingTest() {
+                    val holder = TestSubjectHolder(listOf(10, 100, 1_000))
+
+                    assertThat(holder.list.size).isEqualTo(3)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/TestSubjectHolder.kt line 12: Replace with assertThat(holder.list).hasSize(3):
+@@ -4 +4
++ import assertk.assertions.hasSize
+@@ -12 +13
+-         assertThat(holder.list.size).isEqualTo(3)
++         assertThat(holder.list).hasSize(3)""",
+        )
+    }
 }
