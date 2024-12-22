@@ -24,6 +24,7 @@ val assertkStub =
 
 val assertkAssertionsStub =
     """
+    @file:JvmName("AnyKt")
     package assertk.assertions
 
     fun <T, U> Assert<T>.prop(property: () -> U): Assert<U> {
@@ -45,9 +46,14 @@ val assertkAssertionsStub =
     fun <T> Assert<T>.isFalse() {
 
     }
+
+    inline fun <reified T : Any> Assert<Any?>.isInstanceOf(): Assert<T> = isInstanceOf(T::class)
+
+    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: KClass<T>): Assert<T> {
+    }
     """.trimIndent()
 
-val assertkCollectionStub =
+val assertkIterableStub =
     """
     @file:JvmName("IterableKt")
     package assertk.assertions
@@ -69,14 +75,23 @@ val assertkCollectionStub =
     }
     """.trimIndent()
 
-val assertkAnyStub =
+val assertkCollectionStub =
     """
-    @file:JvmName("AnyKt")
+    @file:JvmName("CollectionKt")
     package assertk.assertions
 
-    inline fun <reified T : Any> Assert<Any?>.isInstanceOf(): Assert<T> = isInstanceOf(T::class)
+    fun Assert<Collection<*>>.hasSize(value: Int) {
 
-    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: KClass<T>): Assert<T> {
+    }
+    """.trimIndent()
+
+val assertkComparableStub =
+    """
+    @file:JvmName("ComparableKt")
+    package assertk.assertions
+
+    fun <A, B : Comparable<A>> Assert<B>.isGreaterThan(other: A) {
+
     }
     """.trimIndent()
 
@@ -94,6 +109,7 @@ val ASSERTK_STUBS =
         kotlin(assertkStub),
         kotlin(assertkAssertionsStub),
         kotlin(assertkCollectionStub),
-        kotlin(assertkAnyStub),
+        kotlin(assertkComparableStub),
+        kotlin(assertkIterableStub),
         kotlin(assertkAnyJvmStub),
     )
