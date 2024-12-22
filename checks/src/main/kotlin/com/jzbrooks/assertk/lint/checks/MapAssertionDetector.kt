@@ -127,28 +127,28 @@ class MapAssertionDetector :
                     if (callExpr?.methodIdentifier?.name == "doesNotContain") {
                         val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
 
-                        val callArgument = callExpr.valueArguments.firstOrNull()
-                        val quickFix =
-                            if (keysRead.mapExpression != null && callArgument != null) {
-                                fix()
-                                    .replace()
-                                    .imports("assertk.assertions.doesNotContainKey")
-                                    .reformat(true)
-                                    .range(context.getLocation(parentExpr))
-                                    .with(
-                                        buildString {
-                                            append("assertThat(")
-                                            append(keysRead.mapExpression.sourcePsi!!.text)
-                                            append(").doesNotContainKey(")
-                                            appendKeyExpression(callArgument)
-                                            append(')')
-                                        },
-                                    ).build()
-                            } else {
-                                null
-                            }
-
                         if (containingClassName == "assertk.assertions.IterableKt") {
+                            val callArgument = callExpr.valueArguments.firstOrNull()
+                            val quickFix =
+                                if (keysRead.mapExpression != null && callArgument != null) {
+                                    fix()
+                                        .replace()
+                                        .imports("assertk.assertions.doesNotContainKey")
+                                        .reformat(true)
+                                        .range(context.getLocation(parentExpr))
+                                        .with(
+                                            buildString {
+                                                append("assertThat(")
+                                                append(keysRead.mapExpression.sourcePsi!!.text)
+                                                append(").doesNotContainKey(")
+                                                appendKeyExpression(callArgument)
+                                                append(')')
+                                            },
+                                        ).build()
+                                } else {
+                                    null
+                                }
+
                             context.report(
                                 KEYS_SET_ABSENT_ISSUE,
                                 node,

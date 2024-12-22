@@ -88,4 +88,25 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
 0 errors, 1 warnings""",
         )
     }
+
+    @Test
+    fun `size property read is ignored without equality comparison`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isGreaterThan
+
+            class TestingTesting {
+                fun testingTest() {
+                    val list: List<Int> = listOf(10, 100, 1_000)
+
+                    assertThat(list.size).isGreaterThan(3)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+    }
 }
