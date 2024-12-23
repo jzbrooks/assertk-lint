@@ -4,12 +4,21 @@
 
 ### Added
 
-- _EqualityComparisonAssertion_ prohibits equality expression in `assertThat`
-- _CollectionSizeAssertion_ prohibits `Collection.size` reads in `assertThat`
+### Changed
+
+### Deprecated
+
+### Removed
 
 ### Fixed
 
-- _UnusedAssertkAssertion_ flags _used_ assertion subjects in lambda expressions
+### Security
+
+## 1.4.0 - 2024-12-23
+
+### Added
+
+- _EqualityComparisonAssertion_ prohibits equality expression in assertThatCollection.sizeassertThat
 
 ## 1.3.0 - 2024-10-22
 
