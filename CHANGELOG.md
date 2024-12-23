@@ -4,6 +4,20 @@
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 1.4.0 - 2024-12-23
+
+### Added
+
 - _EqualityComparisonAssertion_ prohibits equality expression in `assertThat`
 - _CollectionSizeAssertion_ prohibits `Collection.size` reads in `assertThat`
 
