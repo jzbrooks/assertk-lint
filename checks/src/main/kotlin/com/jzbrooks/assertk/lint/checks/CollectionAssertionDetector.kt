@@ -18,7 +18,8 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
-import org.jetbrains.uast.skipParenthesizedExprUp
+import org.jetbrains.uast.getOutermostQualified
+import org.jetbrains.uast.getQualifiedChain
 import java.util.EnumSet
 
 class CollectionAssertionDetector :
@@ -51,31 +52,54 @@ class CollectionAssertionDetector :
             ) {
                 val sizeRead = getReceiverForSizeRead(evaluator, argExpr)
                 if (sizeRead != null) {
-                    val parentExpr =
-                        skipParenthesizedExprUp(node.uastParent)
-                            as? UQualifiedReferenceExpression
+                    val assertionCallExpr =
+                        node
+                            .getOutermostQualified()
+                            .getQualifiedChain()
+                            .lastOrNull() as? UCallExpression
 
-                    val callExpr = parentExpr?.selector as? UCallExpression
-                    if (callExpr?.methodIdentifier?.name == "isEqualTo") {
-                        val containingClassName = callExpr.resolve()?.containingClass?.qualifiedName
+                    if (assertionCallExpr?.methodIdentifier?.name == "isEqualTo") {
+                        val containingClassName =
+                            assertionCallExpr
+                                .resolve()
+                                ?.containingClass
+                                ?.qualifiedName
+
                         if (containingClassName == "assertk.assertions.AnyKt") {
-                            val callArgument = callExpr.valueArguments.firstOrNull()
+                            val callArgument = assertionCallExpr.valueArguments.firstOrNull()
                             val quickFix =
                                 if (sizeRead.collectionExpr != null && callArgument != null) {
+                                    val sizeReplacement =
+                                        fix()
+                                            .replace()
+                                            .reformat(true)
+                                            .range(context.getLocation(argExpr))
+                                            .with(sizeRead.collectionExpr.sourcePsi!!.text)
+                                            .build()
+
+                                    val hasSizeReplacement =
+                                        fix()
+                                            .replace()
+                                            .imports("assertk.assertions.hasSize")
+                                            .reformat(true)
+                                            .range(
+                                                context.getCallLocation(
+                                                    assertionCallExpr,
+                                                    includeReceiver = false,
+                                                    includeArguments = true,
+                                                ),
+                                            ).with(
+                                                buildString {
+                                                    append("hasSize(")
+                                                    append(callArgument.sourcePsi!!.text)
+                                                    append(')')
+                                                },
+                                            ).build()
+
                                     fix()
-                                        .replace()
-                                        .imports("assertk.assertions.hasSize")
-                                        .reformat(true)
-                                        .range(context.getLocation(parentExpr))
-                                        .with(
-                                            buildString {
-                                                append("assertThat(")
-                                                append(sizeRead.collectionExpr.sourcePsi!!.text)
-                                                append(").hasSize(")
-                                                append(callArgument.sourcePsi!!.text)
-                                                append(')')
-                                            },
-                                        ).build()
+                                        .name(
+                                            "Replace size equality comparison with hasSize assertion",
+                                        ).composite(sizeReplacement, hasSizeReplacement)
                                 } else {
                                     null
                                 }
@@ -83,35 +107,17 @@ class CollectionAssertionDetector :
                             context.report(
                                 SIZE_READ_ISSUE,
                                 node,
-                                context.getLocation(node),
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
                                 SIZE_READ_ISSUE.getBriefDescription(TextFormat.TEXT),
                                 quickFix,
                             )
                         }
                     }
                 }
-            }
-
-            private fun JavaEvaluator.isSizeReadEqualTo(
-                propertyAccessExpr: UQualifiedReferenceExpression,
-            ): Boolean {
-                val propertyReadExpr =
-                    propertyAccessExpr.selector
-                        as? USimpleNameReferenceExpression ?: return false
-
-                val parentExpr =
-                    skipParenthesizedExprUp(propertyAccessExpr.uastParent)
-                        as? UQualifiedReferenceExpression
-
-                val callExpr = parentExpr?.selector as? UCallExpression
-
-                return callExpr?.methodIdentifier?.name == "isEqualTo" &&
-                    propertyReadExpr.resolvedName == "size" &&
-                    InheritanceUtil.isInheritorOrSelf(
-                        getTypeClass(propertyAccessExpr.receiver.getExpressionType()),
-                        findClass("java.util.Collection"),
-                        true,
-                    )
             }
 
             private fun getReceiverForSizeRead(
