@@ -5,8 +5,9 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["/com.android.tools.lint/", "com.android.lint"],
-      "groupName": "Android Lint"
+      "matchPackageNames": ["^com.android.tools.lint", "com.android.lint"],
+      "groupName": "Android Lint",
+      "groupSlug": "android-lint"
     }
   ]
 }
