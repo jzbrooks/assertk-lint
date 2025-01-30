@@ -7,8 +7,6 @@ val assertkStub =
     @file:JvmName("AssertKt")
     package assertk
 
-    import java.lang.AssertionError
-
     class Assert<T> {
 
     }
@@ -18,7 +16,7 @@ val assertkStub =
     }
 
     fun fail() {
-        throw AssertionError("fail!")
+        throw java.lang.AssertionError("fail!")
     }
     """.trimIndent()
 
