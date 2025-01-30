@@ -14,9 +14,9 @@ import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULiteralExpression
-import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.UastBinaryOperator
-import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.getOutermostQualified
+import org.jetbrains.uast.getQualifiedChain
 import org.jetbrains.uast.isNullLiteral
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
@@ -63,7 +63,7 @@ class BooleanExpressionSubjectDetector :
                                         includeArguments = true,
                                     ),
                                     NULL_EXPR_ISSUE.getBriefDescription(TextFormat.TEXT),
-                                    buildNullExprQuickFix(argExpr),
+                                    buildNullExprQuickFix(argExpr, node),
                                 )
 
                             argExpr.isEqualityComparisonExpr ->
@@ -75,14 +75,17 @@ class BooleanExpressionSubjectDetector :
                                         includeArguments = true,
                                     ),
                                     EQUALITY_EXPR_ISSUE.getBriefDescription(TextFormat.TEXT),
-                                    buildEqualExprQuickFix(argExpr),
+                                    buildEqualExprQuickFix(argExpr, node),
                                 )
                         }
                     }
                 }
             }
 
-            private fun buildNullExprQuickFix(nullCheckExpr: UBinaryExpression): LintFix? {
+            private fun buildNullExprQuickFix(
+                nullCheckExpr: UBinaryExpression,
+                call: UCallExpression,
+            ): LintFix? {
                 val assertThatExprReplacement =
                     when {
                         (nullCheckExpr.leftOperand as? ULiteralExpression)?.isNull == true -> {
@@ -107,9 +110,10 @@ class BooleanExpressionSubjectDetector :
                     }
 
                 val assertionCall =
-                    nullCheckExpr
-                        .getParentOfType<UQualifiedReferenceExpression>()
-                        ?.selector as? UCallExpression
+                    call
+                        .getOutermostQualified()
+                        .getQualifiedChain()
+                        .lastOrNull() as? UCallExpression
 
                 val assertionReplacement =
                     when (nullCheckExpr.operator) {
@@ -193,7 +197,10 @@ class BooleanExpressionSubjectDetector :
                 }
             }
 
-            private fun buildEqualExprQuickFix(equalityExpr: UBinaryExpression): LintFix? {
+            private fun buildEqualExprQuickFix(
+                equalityExpr: UBinaryExpression,
+                call: UCallExpression,
+            ): LintFix? {
                 val (assertThatExprReplacement, expectsExpr) =
                     when {
                         equalityExpr.leftOperand.isLiteralOrStringTemplate ->
@@ -214,21 +221,22 @@ class BooleanExpressionSubjectDetector :
                     }
 
                 val assertionCall =
-                    equalityExpr
-                        .getParentOfType<UQualifiedReferenceExpression>()
-                        ?.selector as? UCallExpression
+                    call
+                        .getOutermostQualified()
+                        .getQualifiedChain()
+                        .lastOrNull() as? UCallExpression
 
                 val assertionReplacement =
                     when (equalityExpr.operator) {
                         UastBinaryOperator.EQUALS -> {
-                            assertionCall?.let { call ->
-                                when (call.methodIdentifier?.name) {
+                            assertionCall?.let {
+                                when (it.methodIdentifier?.name) {
                                     "isTrue" ->
                                         fix()
                                             .replace()
                                             .range(
                                                 context.getCallLocation(
-                                                    call,
+                                                    it,
                                                     includeReceiver = false,
                                                     includeArguments = true,
                                                 ),
@@ -242,7 +250,7 @@ class BooleanExpressionSubjectDetector :
                                             .replace()
                                             .range(
                                                 context.getCallLocation(
-                                                    call,
+                                                    it,
                                                     includeReceiver = false,
                                                     includeArguments = true,
                                                 ),
@@ -257,14 +265,14 @@ class BooleanExpressionSubjectDetector :
                         }
 
                         UastBinaryOperator.NOT_EQUALS -> {
-                            assertionCall?.let { call ->
-                                when (call.methodIdentifier?.name) {
+                            assertionCall?.let {
+                                when (it.methodIdentifier?.name) {
                                     "isTrue" ->
                                         fix()
                                             .replace()
                                             .range(
                                                 context.getCallLocation(
-                                                    call,
+                                                    it,
                                                     includeReceiver = false,
                                                     includeArguments = true,
                                                 ),
@@ -278,7 +286,7 @@ class BooleanExpressionSubjectDetector :
                                             .replace()
                                             .range(
                                                 context.getCallLocation(
-                                                    call,
+                                                    it,
                                                     includeReceiver = false,
                                                     includeArguments = true,
                                                 ),
