@@ -1,6 +1,7 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
+import com.android.tools.lint.checks.infrastructure.TestMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -53,10 +54,22 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
+        lint()
+            .skipTestModes(
+                TestMode.FULLY_QUALIFIED,
+            ).files(kotlin(code), *ASSERTK_STUBS)
+            .run()
+            .expect(
+                """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
         assertThat(list.size).isEqualTo(3)
         ~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+            )
+
+        lint().testModes(TestMode.FULLY_QUALIFIED).files(kotlin(code), *ASSERTK_STUBS).run().expect(
+            """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
+        assertk.assertThat(list.size).isEqualTo(3)
+                ~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
         )
     }
@@ -81,10 +94,22 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
+        lint()
+            .skipTestModes(
+                TestMode.FULLY_QUALIFIED,
+            ).files(kotlin(code), *ASSERTK_STUBS)
+            .run()
+            .expect(
+                """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
         assertThat(holder.list.size).isEqualTo(3)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+            )
+
+        lint().testModes(TestMode.FULLY_QUALIFIED).files(kotlin(code), *ASSERTK_STUBS).run().expect(
+            """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
+        assertk.assertThat(holder.list.size).isEqualTo(3)
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
         )
     }
@@ -129,7 +154,7 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/TestingTesting.kt line 10: Replace with assertThat(list).hasSize(3):
+            """Fix for src/clean/TestingTesting.kt line 10: Replace size equality comparison with hasSize assertion:
 @@ -4 +4
 + import assertk.assertions.hasSize
 @@ -10 +11
@@ -159,7 +184,7 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/TestSubjectHolder.kt line 12: Replace with assertThat(holder.list).hasSize(3):
+            """Fix for src/clean/TestSubjectHolder.kt line 12: Replace size equality comparison with hasSize assertion:
 @@ -4 +4
 + import assertk.assertions.hasSize
 @@ -12 +13
