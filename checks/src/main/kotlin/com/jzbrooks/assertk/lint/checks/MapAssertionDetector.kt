@@ -20,7 +20,7 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
-import org.jetbrains.uast.skipParenthesizedExprUp
+import org.jetbrains.uast.getOutermostQualified
 import java.util.EnumSet
 
 class MapAssertionDetector :
@@ -119,9 +119,7 @@ class MapAssertionDetector :
                 val keysRead = getReceiverForKeysRead(evaluator, argExpr)
 
                 if (keysRead != null) {
-                    val parentExpr =
-                        skipParenthesizedExprUp(node.uastParent)
-                            as? UQualifiedReferenceExpression
+                    val parentExpr = node.getOutermostQualified()
 
                     val callExpr = parentExpr?.selector as? UCallExpression
                     if (callExpr?.methodIdentifier?.name == "doesNotContain") {
@@ -169,9 +167,7 @@ class MapAssertionDetector :
                 val keysRead = getReceiverForKeysRead(evaluator, argExpr)
 
                 if (keysRead != null) {
-                    val parentExpr =
-                        skipParenthesizedExprUp(node.uastParent)
-                            as? UQualifiedReferenceExpression
+                    val parentExpr = node.getOutermostQualified()
 
                     val callExpr = parentExpr?.selector as? UCallExpression
                     if (callExpr?.methodIdentifier?.name == "contains") {
