@@ -19,7 +19,6 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.getOutermostQualified
-import org.jetbrains.uast.getQualifiedChain
 import java.util.EnumSet
 
 class CollectionAssertionDetector :
@@ -52,11 +51,8 @@ class CollectionAssertionDetector :
             ) {
                 val sizeRead = getReceiverForSizeRead(evaluator, argExpr)
                 if (sizeRead != null) {
-                    val assertionCallExpr =
-                        node
-                            .getOutermostQualified()
-                            .getQualifiedChain()
-                            .lastOrNull() as? UCallExpression
+                    val parentExpr = node.getOutermostQualified()
+                    val assertionCallExpr = parentExpr?.selector as? UCallExpression
 
                     if (assertionCallExpr?.methodIdentifier?.name == "isEqualTo") {
                         val containingClassName =

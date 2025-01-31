@@ -1,7 +1,6 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -55,9 +54,7 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint()
-            .skipTestModes(
-                TestMode.FULLY_QUALIFIED,
-            ).files(kotlin(code), *ASSERTK_STUBS)
+            .files(kotlin(code), *ASSERTK_STUBS)
             .run()
             .expect(
                 """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
@@ -65,13 +62,6 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
         ~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
             )
-
-        lint().testModes(TestMode.FULLY_QUALIFIED).files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
-        assertk.assertThat(list.size).isEqualTo(3)
-                ~~~~~~~~~~~~~~~~~~~~~
-0 errors, 1 warnings""",
-        )
     }
 
     @Test
@@ -95,9 +85,7 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint()
-            .skipTestModes(
-                TestMode.FULLY_QUALIFIED,
-            ).files(kotlin(code), *ASSERTK_STUBS)
+            .files(kotlin(code), *ASSERTK_STUBS)
             .run()
             .expect(
                 """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
@@ -105,13 +93,6 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
             )
-
-        lint().testModes(TestMode.FULLY_QUALIFIED).files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
-        assertk.assertThat(holder.list.size).isEqualTo(3)
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-0 errors, 1 warnings""",
-        )
     }
 
     @Test
