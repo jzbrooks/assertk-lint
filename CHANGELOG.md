@@ -6,13 +6,8 @@
 
 ### Changed
 
-### Deprecated
-
-### Removed
-
 ### Fixed
-
-### Security
+- Fully qualified method calls are handled
 
 ## 1.4.0 - 2024-12-23
 
