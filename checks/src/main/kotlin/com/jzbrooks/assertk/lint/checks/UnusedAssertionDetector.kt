@@ -6,15 +6,20 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiMethod
+import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.ULambdaExpression
+import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
 class UnusedAssertionDetector :
@@ -53,8 +58,124 @@ class UnusedAssertionDetector :
                         includeArguments = true,
                     ),
                     ISSUE.getBriefDescription(TextFormat.TEXT),
+                    buildFix(context, node),
                 )
             }
+        }
+    }
+
+    /**
+     * TODO: There's a good deal of duplication w.r.t. the quick fixes
+     * in [BooleanExpressionSubjectDetector]. An abstraction might be in order soon.
+     */
+    private fun buildFix(
+        context: JavaContext,
+        assertThat: UCallExpression,
+    ): LintFix? {
+        val binaryExprArg =
+            assertThat.valueArguments
+                .map { it.skipParenthesizedExprDown() }
+                .filterIsInstance<UBinaryExpression>()
+                .firstOrNull() ?: return null
+
+        return when {
+            binaryExprArg.isNullComparisonExpr -> {
+                when {
+                    (binaryExprArg.rightOperand as? ULiteralExpression)?.isNull == true -> {
+                        when (binaryExprArg.operator) {
+                            UastBinaryOperator.EQUALS -> {
+                                fix()
+                                    .replace()
+                                    .range(
+                                        context.getCallLocation(
+                                            assertThat,
+                                            includeReceiver = false,
+                                            includeArguments = true,
+                                        ),
+                                    ).imports("assertk.assertions.isNull")
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                                            append(").isNull()")
+                                        },
+                                    ).reformat(true)
+                                    .build()
+                            }
+
+                            UastBinaryOperator.NOT_EQUALS ->
+                                fix()
+                                    .replace()
+                                    .range(
+                                        context.getCallLocation(
+                                            assertThat,
+                                            includeReceiver = false,
+                                            includeArguments = true,
+                                        ),
+                                    ).imports("assertk.assertions.isNotNull")
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                                            append(").isNotNull()")
+                                        },
+                                    ).reformat(true)
+                                    .build()
+
+                            else -> null
+                        }
+                    }
+
+                    (binaryExprArg.leftOperand as? ULiteralExpression)?.isNull == true -> {
+                        when (binaryExprArg.operator) {
+                            UastBinaryOperator.EQUALS -> {
+                                fix()
+                                    .replace()
+                                    .range(
+                                        context.getCallLocation(
+                                            assertThat,
+                                            includeReceiver = false,
+                                            includeArguments = true,
+                                        ),
+                                    ).imports("assertk.assertions.isNull")
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                                            append(").isNull()")
+                                        },
+                                    ).reformat(true)
+                                    .build()
+                            }
+
+                            UastBinaryOperator.NOT_EQUALS ->
+                                fix()
+                                    .replace()
+                                    .range(
+                                        context.getCallLocation(
+                                            assertThat,
+                                            includeReceiver = false,
+                                            includeArguments = true,
+                                        ),
+                                    ).imports("assertk.assertions.isNotNull")
+                                    .with(
+                                        buildString {
+                                            append("assertThat(")
+                                            append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                                            append(").isNotNull()")
+                                        },
+                                    ).reformat(true)
+                                    .build()
+
+                            else -> null
+                        }
+                    }
+
+                    else -> null // todo: should this throw?
+                }
+            }
+
+            else -> null
         }
     }
 

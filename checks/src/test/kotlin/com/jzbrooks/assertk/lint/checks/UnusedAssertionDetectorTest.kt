@@ -125,4 +125,112 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
 1 errors, 0 warnings""",
         )
     }
+
+    @Test
+    fun `quick fix applied for null check with rhs literal`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name == null)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNull():
+@@ -4 +4
++ import assertk.assertions.isNull
+@@ -9 +10
+-         assertThat(name == null)
++         assertThat(name).isNull()""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for not-null check with rhs literal`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name != null)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotNull():
+@@ -4 +4
++ import assertk.assertions.isNotNull
+@@ -9 +10
+-         assertThat(name != null)
++         assertThat(name).isNotNull()""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for null check with lhs literal`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(null == name)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNull():
+@@ -4 +4
++ import assertk.assertions.isNull
+@@ -9 +10
+-         assertThat(null == name)
++         assertThat(name).isNull()""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for not-null check with lhs literal`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isTrue
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(null != name)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotNull():
+@@ -4 +4
++ import assertk.assertions.isNotNull
+@@ -9 +10
+-         assertThat(null != name)
++         assertThat(name).isNotNull()""",
+        )
+    }
 }

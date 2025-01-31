@@ -17,7 +17,6 @@ import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.getOutermostQualified
 import org.jetbrains.uast.getQualifiedChain
-import org.jetbrains.uast.isNullLiteral
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
@@ -31,16 +30,6 @@ class BooleanExpressionSubjectDetector :
 
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
-            private val UBinaryExpression.isNullComparisonExpr: Boolean
-                get() =
-                    operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
-                        (leftOperand.isNullLiteral() || rightOperand.isNullLiteral())
-
-            private val UBinaryExpression.isEqualityComparisonExpr: Boolean
-                get() =
-                    operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
-                        (!leftOperand.isNullLiteral() && !rightOperand.isNullLiteral())
-
             override fun visitCallExpression(node: UCallExpression) {
                 if (!node.isKotlin) return
 
