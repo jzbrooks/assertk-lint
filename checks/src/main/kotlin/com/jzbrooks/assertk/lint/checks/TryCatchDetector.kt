@@ -13,7 +13,9 @@ import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.UTryExpression
+import org.jetbrains.uast.getUCallExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
+import org.jetbrains.uast.skipParenthesizedExprUp
 import java.util.EnumSet
 
 class TryCatchDetector :
@@ -38,7 +40,7 @@ class TryCatchDetector :
 
                 val nonFailCallExpressionCount =
                     tryClause.expressions.count {
-                        (it.skipParenthesizedExprDown() as? UCallExpression)?.methodName != "fail"
+                        it.skipParenthesizedExprDown().getUCallExpression()?.methodName != "fail"
                     }
 
                 if (nonFailCallExpressionCount == 1) {
@@ -47,11 +49,18 @@ class TryCatchDetector :
                             .filterIsInstance<UQualifiedReferenceExpression>()
                             .count {
                                 val deepestReceiver = it.deepestReceiver
+                                val firstCall =
+                                    if (deepestReceiver is UCallExpression) {
+                                        deepestReceiver
+                                    } else {
+                                        skipParenthesizedExprUp(it.deepestReceiver)
+                                            .getUCallExpression()
+                                    }
 
-                                deepestReceiver is UCallExpression &&
-                                    deepestReceiver.methodName == "assertThat" &&
+                                firstCall != null &&
+                                    firstCall.methodName == "assertThat" &&
                                     context.evaluator.isMemberInClass(
-                                        deepestReceiver.resolve(),
+                                        firstCall.resolve(),
                                         "assertk.AssertKt",
                                     )
                             }
