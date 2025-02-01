@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Quick fixes for null check and equality tests for _UnusedAssertkAssertion_
 
 ### Changed
 
