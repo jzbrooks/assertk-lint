@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiMethod
+import org.jetbrains.kotlin.psi.KtIsExpression
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.ULambdaExpression
@@ -19,8 +20,6 @@ import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.getParentOfType
-import org.jetbrains.uast.kotlin.KotlinBinaryExpressionWithTypeKinds
-import org.jetbrains.uast.kotlin.KotlinUTypeCheckExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
@@ -79,11 +78,16 @@ class UnusedAssertionDetector :
                 .map { it.skipParenthesizedExprDown() }
                 .firstOrNull() ?: return null
 
-        @Suppress("UnstableApiUsage")
-        return when (argExpr) {
-            is UBinaryExpression -> buildFixForBinaryExpression(context, assertThat, argExpr)
+        val psi = argExpr.sourcePsi
+        return when {
+            argExpr is UBinaryExpression ->
+                buildFixForBinaryExpression(
+                    context,
+                    assertThat,
+                    argExpr,
+                )
 
-            is KotlinUTypeCheckExpression -> buildFixForTypeCheck(context, assertThat, argExpr)
+            psi is KtIsExpression -> buildFixForTypeCheck(context, assertThat, psi)
 
             else -> null
         }
@@ -234,18 +238,12 @@ class UnusedAssertionDetector :
         }
     }
 
-    @Suppress("UnstableApiUsage")
     private fun buildFixForTypeCheck(
         context: JavaContext,
         assertThat: UCallExpression,
-        typeCheckExpr: KotlinUTypeCheckExpression,
-    ): LintFix? {
-        val assertion =
-            when {
-                typeCheckExpr.operationKind ==
-                    KotlinBinaryExpressionWithTypeKinds.NEGATED_INSTANCE_CHECK -> "isNotInstanceOf"
-                else -> "isInstanceOf"
-            }
+        typeCheckExpr: KtIsExpression,
+    ): LintFix {
+        val assertion = if (typeCheckExpr.isNegated) "isNotInstanceOf" else "isInstanceOf"
 
         return fix()
             .replace()
@@ -259,9 +257,9 @@ class UnusedAssertionDetector :
             .with(
                 buildString {
                     append("assertThat(")
-                    append(typeCheckExpr.operand.sourcePsi!!.text)
+                    append(typeCheckExpr.leftHandSide.text)
                     append(").$assertion<")
-                    append(typeCheckExpr.typeReference!!.sourcePsi!!.text)
+                    append(typeCheckExpr.typeReference!!.text)
                     append(">()")
                 },
             ).reformat(true)
