@@ -19,6 +19,8 @@ import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.kotlin.KotlinBinaryExpressionWithTypeKinds
+import org.jetbrains.uast.kotlin.KotlinUTypeCheckExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
@@ -72,17 +74,31 @@ class UnusedAssertionDetector :
         context: JavaContext,
         assertThat: UCallExpression,
     ): LintFix? {
-        val binaryExprArg =
+        val argExpr =
             assertThat.valueArguments
                 .map { it.skipParenthesizedExprDown() }
-                .filterIsInstance<UBinaryExpression>()
                 .firstOrNull() ?: return null
 
+        @Suppress("UnstableApiUsage")
+        return when (argExpr) {
+            is UBinaryExpression -> buildFixForBinaryExpression(context, assertThat, argExpr)
+
+            is KotlinUTypeCheckExpression -> buildFixForTypeCheck(context, assertThat, argExpr)
+
+            else -> null
+        }
+    }
+
+    private fun buildFixForBinaryExpression(
+        context: JavaContext,
+        assertThat: UCallExpression,
+        binaryExpr: UBinaryExpression,
+    ): LintFix? {
         return when {
-            binaryExprArg.isNullComparisonExpr -> {
+            binaryExpr.isNullComparisonExpr -> {
                 when {
-                    (binaryExprArg.rightOperand as? ULiteralExpression)?.isNull == true -> {
-                        when (binaryExprArg.operator) {
+                    (binaryExpr.rightOperand as? ULiteralExpression)?.isNull == true -> {
+                        when (binaryExpr.operator) {
                             UastBinaryOperator.EQUALS -> {
                                 fix()
                                     .replace()
@@ -96,7 +112,7 @@ class UnusedAssertionDetector :
                                     .with(
                                         buildString {
                                             append("assertThat(")
-                                            append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                                            append(binaryExpr.leftOperand.sourcePsi!!.text)
                                             append(").isNull()")
                                         },
                                     ).reformat(true)
@@ -116,7 +132,7 @@ class UnusedAssertionDetector :
                                     .with(
                                         buildString {
                                             append("assertThat(")
-                                            append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                                            append(binaryExpr.leftOperand.sourcePsi!!.text)
                                             append(").isNotNull()")
                                         },
                                     ).reformat(true)
@@ -126,8 +142,8 @@ class UnusedAssertionDetector :
                         }
                     }
 
-                    (binaryExprArg.leftOperand as? ULiteralExpression)?.isNull == true -> {
-                        when (binaryExprArg.operator) {
+                    (binaryExpr.leftOperand as? ULiteralExpression)?.isNull == true -> {
+                        when (binaryExpr.operator) {
                             UastBinaryOperator.EQUALS -> {
                                 fix()
                                     .replace()
@@ -141,7 +157,7 @@ class UnusedAssertionDetector :
                                     .with(
                                         buildString {
                                             append("assertThat(")
-                                            append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                                            append(binaryExpr.rightOperand.sourcePsi!!.text)
                                             append(").isNull()")
                                         },
                                     ).reformat(true)
@@ -161,7 +177,7 @@ class UnusedAssertionDetector :
                                     .with(
                                         buildString {
                                             append("assertThat(")
-                                            append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                                            append(binaryExpr.rightOperand.sourcePsi!!.text)
                                             append(").isNotNull()")
                                         },
                                     ).reformat(true)
@@ -175,9 +191,9 @@ class UnusedAssertionDetector :
                 }
             }
 
-            binaryExprArg.isEqualityComparisonExpr -> {
+            binaryExpr.isEqualityComparisonExpr -> {
                 val assertion =
-                    when (binaryExprArg.operator) {
+                    when (binaryExpr.operator) {
                         UastBinaryOperator.EQUALS -> "isEqualTo"
                         UastBinaryOperator.NOT_EQUALS -> "isNotEqualTo"
                         else -> return null
@@ -194,18 +210,18 @@ class UnusedAssertionDetector :
                     ).with(
                         buildString {
                             append("assertThat(")
-                            if (binaryExprArg.leftOperand.isLiteralOrStringTemplate) {
-                                append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                            if (binaryExpr.leftOperand.isLiteralOrStringTemplate) {
+                                append(binaryExpr.rightOperand.sourcePsi!!.text)
                             } else {
-                                append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                                append(binaryExpr.leftOperand.sourcePsi!!.text)
                             }
                             append(").")
                             append(assertion)
                             append("(")
-                            if (binaryExprArg.leftOperand.isLiteralOrStringTemplate) {
-                                append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                            if (binaryExpr.leftOperand.isLiteralOrStringTemplate) {
+                                append(binaryExpr.leftOperand.sourcePsi!!.text)
                             } else {
-                                append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                                append(binaryExpr.rightOperand.sourcePsi!!.text)
                             }
                             append(")")
                         },
@@ -216,6 +232,40 @@ class UnusedAssertionDetector :
 
             else -> null
         }
+    }
+
+    @Suppress("UnstableApiUsage")
+    private fun buildFixForTypeCheck(
+        context: JavaContext,
+        assertThat: UCallExpression,
+        typeCheckExpr: KotlinUTypeCheckExpression,
+    ): LintFix? {
+        val assertion =
+            when {
+                typeCheckExpr.operationKind ==
+                    KotlinBinaryExpressionWithTypeKinds.NEGATED_INSTANCE_CHECK -> "isNotInstanceOf"
+                else -> "isInstanceOf"
+            }
+
+        return fix()
+            .replace()
+            .range(
+                context.getCallLocation(
+                    assertThat,
+                    includeReceiver = false,
+                    includeArguments = true,
+                ),
+            ).imports("assertk.assertions.$assertion")
+            .with(
+                buildString {
+                    append("assertThat(")
+                    append(typeCheckExpr.operand.sourcePsi!!.text)
+                    append(").$assertion<")
+                    append(typeCheckExpr.typeReference!!.sourcePsi!!.text)
+                    append(">()")
+                },
+            ).reformat(true)
+            .build()
     }
 
     companion object {

@@ -341,4 +341,56 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
 +         assertThat(name).isEqualTo("Test")""",
         )
     }
+
+    @Test
+    fun `quick fix applied for type check`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name is String)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 8: Replace with assertThat(name).isInstanceOf<String>():
+@@ -4 +4
++ import assertk.assertions.isInstanceOf
+@@ -8 +9
+-         assertThat(name is String)
++         assertThat(name).isInstanceOf<String>()""",
+        )
+    }
+
+    @Test
+    fun `quick fix applied for negated type check`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+
+            class Testing {
+                fun nameExists() {
+                    val name: String? = this::class.simpleName
+                    assertThat(name !is String)
+                }
+            }
+            """.trimIndent()
+
+        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
+            """Fix for src/clean/Testing.kt line 8: Replace with assertThat(name).isNotInstanceOf<String>():
+@@ -4 +4
++ import assertk.assertions.isNotInstanceOf
+@@ -8 +9
+-         assertThat(name !is String)
++         assertThat(name).isNotInstanceOf<String>()""",
+        )
+    }
 }
