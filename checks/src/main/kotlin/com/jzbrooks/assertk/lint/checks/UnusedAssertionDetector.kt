@@ -175,6 +175,45 @@ class UnusedAssertionDetector :
                 }
             }
 
+            binaryExprArg.isEqualityComparisonExpr -> {
+                val assertion =
+                    when (binaryExprArg.operator) {
+                        UastBinaryOperator.EQUALS -> "isEqualTo"
+                        UastBinaryOperator.NOT_EQUALS -> "isNotEqualTo"
+                        else -> return null
+                    }
+
+                fix()
+                    .replace()
+                    .range(
+                        context.getCallLocation(
+                            assertThat,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).with(
+                        buildString {
+                            append("assertThat(")
+                            if (binaryExprArg.leftOperand.isLiteralOrStringTemplate) {
+                                append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                            } else {
+                                append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                            }
+                            append(").")
+                            append(assertion)
+                            append("(")
+                            if (binaryExprArg.leftOperand.isLiteralOrStringTemplate) {
+                                append(binaryExprArg.leftOperand.sourcePsi!!.text)
+                            } else {
+                                append(binaryExprArg.rightOperand.sourcePsi!!.text)
+                            }
+                            append(")")
+                        },
+                    ).imports("assertk.assertions.$assertion")
+                    .reformat(true)
+                    .build()
+            }
+
             else -> null
         }
     }
