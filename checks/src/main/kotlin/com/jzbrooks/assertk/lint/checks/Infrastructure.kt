@@ -2,12 +2,15 @@ package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.detector.api.isKotlin
 import com.intellij.psi.PsiMethod
+import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
+import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.asRecursiveLogString
 import org.jetbrains.uast.expressions.UInjectionHost
+import org.jetbrains.uast.isNullLiteral
 import org.jetbrains.uast.skipParenthesizedExprDown
 
 internal val UExpression.isKotlin: Boolean
@@ -22,6 +25,16 @@ internal val PsiMethod.isAssertThat: Boolean
 
 internal val UExpression.isLiteralOrStringTemplate
     get() = this is ULiteralExpression || (this is UInjectionHost && isString)
+
+internal val UBinaryExpression.isNullComparisonExpr: Boolean
+    get() =
+        operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
+            (leftOperand.isNullLiteral() || rightOperand.isNullLiteral())
+
+internal val UBinaryExpression.isEqualityComparisonExpr: Boolean
+    get() =
+        operator in setOf(UastBinaryOperator.EQUALS, UastBinaryOperator.NOT_EQUALS) &&
+            (!leftOperand.isNullLiteral() && !rightOperand.isNullLiteral())
 
 /**
  * Gets the receiver of the expression which is evaluated first at runtime.
