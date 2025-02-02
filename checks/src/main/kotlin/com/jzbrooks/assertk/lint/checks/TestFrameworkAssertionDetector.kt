@@ -119,6 +119,148 @@ class TestFrameworkAssertionDetector :
                             ).build()
                     }
 
+                    "assertTrue" -> {
+                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
+                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isTrue")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isTrue()")
+                                },
+                            ).build()
+                    }
+
+                    "assertFalse" -> {
+                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
+                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isFalse")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isFalse()")
+                                },
+                            ).build()
+                    }
+
+                    "assertNull" -> {
+                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
+                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isNull")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isNull()")
+                                },
+                            ).build()
+                    }
+
+                    "assertNotNull" -> {
+                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
+                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isNotNull")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isNotNull()")
+                                },
+                            ).build()
+                    }
+
+                    "assertSame" -> {
+                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
+                        val expectedExpr =
+                            node.valueArguments.getOrNull(expectedIndex) ?: return null
+                        val actualExpr =
+                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isSameAs")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isSameAs(")
+                                    append(expectedExpr.sourcePsi!!.text)
+                                    append(")")
+                                },
+                            ).build()
+                    }
+
+                    "assertNotSame" -> {
+                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
+                        val expectedExpr =
+                            node.valueArguments.getOrNull(expectedIndex) ?: return null
+                        val actualExpr =
+                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isNotSameAs")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isNotSameAs(")
+                                    append(expectedExpr.sourcePsi!!.text)
+                                    append(")")
+                                },
+                            ).build()
+                    }
+
                     else -> null
                 }
             }
