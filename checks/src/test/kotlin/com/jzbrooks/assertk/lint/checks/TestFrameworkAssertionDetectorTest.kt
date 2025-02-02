@@ -424,6 +424,39 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `junit 4 assertArrayEquals fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.assertArrayEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val expected = intArrayOf(1, 2, 3)
+                    val actual = intArrayOf(1, 2, 3)
+                    assertArrayEquals(expected, actual)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(actual).containsOnly(*expected):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.containsOnly
+@@ -9 +11
+-         assertArrayEquals(expected, actual)
++         assertThat(actual).containsOnly(*expected)""",
+            )
+    }
+
+    @Test
     fun `junit 5 assertion detected`() {
         val code =
             """
@@ -536,6 +569,12 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 }
 
                 public static void assertNotSame(String message, Object unexpected, Object actual) {
+                }
+
+                public static void assertArrayEquals(Object[] expected, Object[] actual) {
+                }
+
+                public static void assertArrayEquals(String message, Object[] expected, Object[] actual) {
                 }
             }
         """
