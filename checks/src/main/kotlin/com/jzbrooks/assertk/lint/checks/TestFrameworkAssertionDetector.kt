@@ -74,6 +74,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -101,6 +102,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -125,6 +127,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -147,6 +150,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -169,6 +173,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -191,6 +196,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -216,6 +222,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -243,6 +250,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -270,6 +278,7 @@ class TestFrameworkAssertionDetector :
 
                         fix()
                             .replace()
+                            .reformat(true)
                             .range(
                                 context.getCallLocation(
                                     node,
@@ -283,6 +292,29 @@ class TestFrameworkAssertionDetector :
                                     append(actualExpr.sourcePsi!!.text)
                                     append(").containsOnly(*")
                                     append(expectedExpr.sourcePsi!!.text)
+                                    append(")")
+                                },
+                            ).build()
+                    }
+
+                    "fail" -> {
+                        val messageExpr = node.valueArguments.firstOrNull()
+
+                        fix()
+                            .replace()
+                            .reformat(true)
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).with(
+                                buildString {
+                                    append("assertk.fail(")
+                                    if (messageExpr != null) {
+                                        append(messageExpr.sourcePsi!!.text)
+                                    }
                                     append(")")
                                 },
                             ).build()

@@ -518,6 +518,62 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             )
     }
 
+    @Test
+    fun `junit 4 fail fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail("This test should fail")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
+@@ -7 +7
+-         fail("This test should fail")
++         assertk.fail("This test should fail")""",
+            )
+    }
+
+    @Test
+    fun `junit 4 fail without message fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail()
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
+@@ -7 +7
+-         fail()
++         assertk.fail()""",
+            )
+    }
+
     companion object {
         private const val JUNIT_4_ASSERT_STUB = """
             package org.junit;
@@ -575,6 +631,12 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 }
 
                 public static void assertArrayEquals(String message, Object[] expected, Object[] actual) {
+                }
+
+                public static void fail() {
+                }
+
+                public static void fail(String message) {
                 }
             }
         """
