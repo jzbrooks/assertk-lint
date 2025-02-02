@@ -125,6 +125,40 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `junit 4 assertNotEquals fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import org.junit.Assert.assertNotEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertNotEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotEqualTo
+@@ -10 +12
+-         assertNotEquals(first, second)
++         assertThat(second).isNotEqualTo(first)""",
+            )
+    }
+
+    @Test
     fun `junit 4 assertEquals with message fixed`() {
         val code =
             """
@@ -229,6 +263,12 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 }
 
                 public static void assertEquals(String message, Object expected, Object actual) {
+                }
+
+                public static void assertNotEquals(Object unexpected, Object actual) {
+                }
+
+                public static void assertNotEquals(String message, Object unexpected, Object actual) {
                 }
             }
         """

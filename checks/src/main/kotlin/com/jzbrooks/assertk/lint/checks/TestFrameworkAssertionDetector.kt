@@ -91,6 +91,34 @@ class TestFrameworkAssertionDetector :
                                 },
                             ).build()
                     }
+
+                    "assertNotEquals" -> {
+                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
+                        val expectedExpr =
+                            node.valueArguments.getOrNull(expectedIndex) ?: return null
+                        val actualExpr =
+                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isNotEqualTo")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isNotEqualTo(")
+                                    append(expectedExpr.sourcePsi!!.text)
+                                    append(")")
+                                },
+                            ).build()
+                    }
+
                     else -> null
                 }
             }
