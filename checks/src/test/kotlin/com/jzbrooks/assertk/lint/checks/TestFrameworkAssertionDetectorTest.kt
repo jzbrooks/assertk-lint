@@ -91,6 +91,74 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `junit 4 assertEquals fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import org.junit.Assert.assertEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals(first, second)
++         assertThat(second).isEqualTo(first)""",
+            )
+    }
+
+    @Test
+    fun `junit 4 assertEquals with message fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import org.junit.Assert.assertEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertEquals("The files are in the computer", first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals("The files are in the computer", first, second)
++         assertThat(second).isEqualTo(first)""",
+            )
+    }
+
+    @Test
     fun `junit 5 assertion detected`() {
         val code =
             """
@@ -158,6 +226,9 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
             public class Assert {
                 public static void assertEquals(Object expected, Object actual) {
+                }
+
+                public static void assertEquals(String message, Object expected, Object actual) {
                 }
             }
         """

@@ -6,6 +6,7 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import org.jetbrains.uast.UCallExpression
@@ -22,32 +23,75 @@ class TestFrameworkAssertionDetector :
 
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
-            private val frameworkAssertionClasses =
-                listOf(
-                    // junit 4
-                    "org.junit.Assert",
-                    // junit 5
-                    "org.junit.jupiter.api.Assertions",
-                    // kotlin.test
-                    "kotlin.test.AssertionsKt__AssertionsKt",
-                )
+            private val junit4 = "org.junit.Assert"
+            private val junit5 = "org.junit.jupiter.api.Assertions"
+            private val kotlinTest = "kotlin.test.AssertionsKt__AssertionsKt"
 
             override fun visitCallExpression(node: UCallExpression) {
                 if (!node.isKotlin) return
 
                 val psiMethod = node.resolve()
 
-                for (assertionClass in frameworkAssertionClasses) {
-                    if (context.evaluator.isMemberInClass(psiMethod, assertionClass)) {
+                when {
+                    context.evaluator.isMemberInClass(psiMethod, junit4) -> {
+                        context.report(
+                            ISSUE,
+                            node,
+                            context.getLocation(node),
+                            "Use assertk assertions",
+                            buildJunit4QuickFix(node),
+                        )
+                    }
+
+                    context.evaluator.isMemberInClass(psiMethod, junit5) -> {
                         context.report(
                             ISSUE,
                             node,
                             context.getLocation(node),
                             "Use assertk assertions",
                         )
-
-                        return
                     }
+
+                    context.evaluator.isMemberInClass(psiMethod, kotlinTest) -> {
+                        context.report(
+                            ISSUE,
+                            node,
+                            context.getLocation(node),
+                            "Use assertk assertions",
+                        )
+                    }
+                }
+            }
+
+            private fun buildJunit4QuickFix(node: UCallExpression): LintFix? {
+                return when (node.methodIdentifier?.name) {
+                    "assertEquals" -> {
+                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
+                        val expectedExpr =
+                            node.valueArguments.getOrNull(expectedIndex) ?: return null
+                        val actualExpr =
+                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                        fix()
+                            .replace()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isEqualTo")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isEqualTo(")
+                                    append(expectedExpr.sourcePsi!!.text)
+                                    append(")")
+                                },
+                            ).build()
+                    }
+                    else -> null
                 }
             }
         }
