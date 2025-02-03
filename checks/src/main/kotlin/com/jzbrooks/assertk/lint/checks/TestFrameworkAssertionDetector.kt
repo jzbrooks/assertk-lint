@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import java.util.EnumSet
 
 class TestFrameworkAssertionDetector :
@@ -63,239 +64,29 @@ class TestFrameworkAssertionDetector :
                 }
             }
 
-            private fun buildJunit4QuickFix(node: UCallExpression): LintFix? {
-                return when (node.methodIdentifier?.name) {
-                    "assertEquals" -> {
-                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
-                        val expectedExpr =
-                            node.valueArguments.getOrNull(expectedIndex) ?: return null
-                        val actualExpr =
-                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+            private fun buildJunit4QuickFix(node: UCallExpression): LintFix? =
+                when (node.methodIdentifier?.name) {
+                    "assertEquals" -> replaceJunit4AssertionWithExpected(node, "isEqualTo")
 
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isEqualTo")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isEqualTo(")
-                                    append(expectedExpr.sourcePsi!!.text)
-                                    append(")")
-                                },
-                            ).build()
-                    }
+                    "assertNotEquals" -> replaceJunit4AssertionWithExpected(node, "isNotEqualTo")
 
-                    "assertNotEquals" -> {
-                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
-                        val expectedExpr =
-                            node.valueArguments.getOrNull(expectedIndex) ?: return null
-                        val actualExpr =
-                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+                    "assertTrue" -> replaceJunit4AssertionWithoutExpected(node, "isTrue")
 
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isNotEqualTo")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isNotEqualTo(")
-                                    append(expectedExpr.sourcePsi!!.text)
-                                    append(")")
-                                },
-                            ).build()
-                    }
+                    "assertFalse" -> replaceJunit4AssertionWithoutExpected(node, "isFalse")
 
-                    "assertTrue" -> {
-                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
-                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+                    "assertNull" -> replaceJunit4AssertionWithoutExpected(node, "isNull")
 
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isTrue")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isTrue()")
-                                },
-                            ).build()
-                    }
+                    "assertNotNull" -> replaceJunit4AssertionWithoutExpected(node, "isNotNull")
 
-                    "assertFalse" -> {
-                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
-                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
+                    "assertSame" -> replaceJunit4AssertionWithExpected(node, "isSameAs")
 
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isFalse")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isFalse()")
-                                },
-                            ).build()
-                    }
+                    "assertNotSame" -> replaceJunit4AssertionWithExpected(node, "isNotSameAs")
 
-                    "assertNull" -> {
-                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
-                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
-
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isNull")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isNull()")
-                                },
-                            ).build()
-                    }
-
-                    "assertNotNull" -> {
-                        val actualIndex = if (node.valueArguments.size == 1) 0 else 1
-                        val actualExpr = node.valueArguments.getOrNull(actualIndex) ?: return null
-
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isNotNull")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isNotNull()")
-                                },
-                            ).build()
-                    }
-
-                    "assertSame" -> {
-                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
-                        val expectedExpr =
-                            node.valueArguments.getOrNull(expectedIndex) ?: return null
-                        val actualExpr =
-                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
-
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isSameAs")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isSameAs(")
-                                    append(expectedExpr.sourcePsi!!.text)
-                                    append(")")
-                                },
-                            ).build()
-                    }
-
-                    "assertNotSame" -> {
-                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
-                        val expectedExpr =
-                            node.valueArguments.getOrNull(expectedIndex) ?: return null
-                        val actualExpr =
-                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
-
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.isNotSameAs")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").isNotSameAs(")
-                                    append(expectedExpr.sourcePsi!!.text)
-                                    append(")")
-                                },
-                            ).build()
-                    }
-
-                    "assertArrayEquals" -> {
-                        val expectedIndex = if (node.valueArguments.size == 2) 0 else 1
-                        val expectedExpr =
-                            node.valueArguments.getOrNull(expectedIndex) ?: return null
-                        val actualExpr =
-                            node.valueArguments.getOrNull(expectedIndex + 1) ?: return null
-
-                        fix()
-                            .replace()
-                            .reformat(true)
-                            .range(
-                                context.getCallLocation(
-                                    node,
-                                    includeReceiver = false,
-                                    includeArguments = true,
-                                ),
-                            ).imports("assertk.assertThat", "assertk.assertions.containsOnly")
-                            .with(
-                                buildString {
-                                    append("assertThat(")
-                                    append(actualExpr.sourcePsi!!.text)
-                                    append(").containsOnly(*")
-                                    append(expectedExpr.sourcePsi!!.text)
-                                    append(")")
-                                },
-                            ).build()
-                    }
+                    "assertArrayEquals" ->
+                        replaceJunit4AssertionWithExpected(node, "containsOnly") {
+                            append("*")
+                            append(it.sourcePsi!!.text)
+                        }
 
                     "fail" -> {
                         val messageExpr = node.valueArguments.firstOrNull()
@@ -322,6 +113,70 @@ class TestFrameworkAssertionDetector :
 
                     else -> null
                 }
+
+            private fun replaceJunit4AssertionWithExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+                expectedTransformation: StringBuilder.(
+                    UExpression,
+                ) -> Unit = { append(it.sourcePsi!!.text) },
+            ): LintFix? {
+                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
+                val expectedExpr =
+                    call.valueArguments.getOrNull(expectedIndex) ?: return null
+                val actualExpr =
+                    call.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                return fix()
+                    .replace()
+                    .reformat(true)
+                    .range(
+                        context.getCallLocation(
+                            call,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
+                    .with(
+                        buildString {
+                            append("assertThat(")
+                            append(actualExpr.sourcePsi!!.text)
+                            append(").")
+                            append(assertionFunctionName)
+                            append("(")
+                            expectedTransformation(expectedExpr)
+                            append(")")
+                        },
+                    ).build()
+            }
+
+            private fun replaceJunit4AssertionWithoutExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+            ): LintFix? {
+                val actualIndex = if (call.valueArguments.size == 1) 0 else 1
+                val actualExpr =
+                    call.valueArguments.getOrNull(actualIndex) ?: return null
+
+                return fix()
+                    .replace()
+                    .reformat(true)
+                    .range(
+                        context.getCallLocation(
+                            call,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
+                    .with(
+                        buildString {
+                            append("assertThat(")
+                            append(actualExpr.sourcePsi!!.text)
+                            append(").")
+                            append(assertionFunctionName)
+                            append("()")
+                        },
+                    ).build()
             }
         }
 
