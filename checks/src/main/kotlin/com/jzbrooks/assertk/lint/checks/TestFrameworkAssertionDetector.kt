@@ -146,6 +146,16 @@ class TestFrameworkAssertionDetector :
                             append("(")
                             expectedTransformation(expectedExpr)
                             append(")")
+
+                            if (call.valueArguments.size == 3) {
+                                append(" // ")
+                                append(
+                                    call.valueArguments
+                                        .first()
+                                        .sourcePsi!!
+                                        .text,
+                                )
+                            }
                         },
                     ).build()
             }
@@ -175,6 +185,16 @@ class TestFrameworkAssertionDetector :
                             append(").")
                             append(assertionFunctionName)
                             append("()")
+
+                            if (call.valueArguments.size == 2) {
+                                append(" // ")
+                                append(
+                                    call.valueArguments
+                                        .first()
+                                        .sourcePsi!!
+                                        .text,
+                                )
+                            }
                         },
                     ).build()
             }

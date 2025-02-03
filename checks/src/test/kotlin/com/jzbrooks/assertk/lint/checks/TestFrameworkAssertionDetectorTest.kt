@@ -182,13 +182,13 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) // "The files are in the computer":
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
 @@ -10 +12
 -         assertEquals("The files are in the computer", first, second)
-+         assertThat(second).isEqualTo(first)""",
++         assertThat(second).isEqualTo(first) // "The files are in the computer"""",
             )
     }
 
@@ -248,13 +248,13 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isTrue():
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isTrue() // "Should be true":
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isTrue
 @@ -9 +11
 -         assertTrue("Should be true", condition)
-+         assertThat(condition).isTrue()""",
++         assertThat(condition).isTrue() // "Should be true"""",
             )
     }
 
