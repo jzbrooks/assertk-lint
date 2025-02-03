@@ -6,10 +6,12 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import java.util.EnumSet
 
 class TestFrameworkAssertionDetector :
@@ -22,33 +24,179 @@ class TestFrameworkAssertionDetector :
 
     override fun createUastHandler(context: JavaContext) =
         object : UElementHandler() {
-            private val frameworkAssertionClasses =
-                listOf(
-                    // junit 4
-                    "org.junit.Assert",
-                    // junit 5
-                    "org.junit.jupiter.api.Assertions",
-                    // kotlin.test
-                    "kotlin.test.AssertionsKt__AssertionsKt",
-                )
+            private val junit4 = "org.junit.Assert"
+            private val junit5 = "org.junit.jupiter.api.Assertions"
+            private val kotlinTest = "kotlin.test.AssertionsKt__AssertionsKt"
 
             override fun visitCallExpression(node: UCallExpression) {
                 if (!node.isKotlin) return
 
                 val psiMethod = node.resolve()
 
-                for (assertionClass in frameworkAssertionClasses) {
-                    if (context.evaluator.isMemberInClass(psiMethod, assertionClass)) {
+                when {
+                    context.evaluator.isMemberInClass(psiMethod, junit4) -> {
+                        context.report(
+                            ISSUE,
+                            node,
+                            context.getLocation(node),
+                            "Use assertk assertions",
+                            buildJunit4QuickFix(node),
+                        )
+                    }
+
+                    context.evaluator.isMemberInClass(psiMethod, junit5) -> {
                         context.report(
                             ISSUE,
                             node,
                             context.getLocation(node),
                             "Use assertk assertions",
                         )
+                    }
 
-                        return
+                    context.evaluator.isMemberInClass(psiMethod, kotlinTest) -> {
+                        context.report(
+                            ISSUE,
+                            node,
+                            context.getLocation(node),
+                            "Use assertk assertions",
+                        )
                     }
                 }
+            }
+
+            private fun buildJunit4QuickFix(node: UCallExpression): LintFix? =
+                when (node.methodIdentifier?.name) {
+                    "assertEquals" -> replaceJunit4AssertionWithExpected(node, "isEqualTo")
+
+                    "assertNotEquals" -> replaceJunit4AssertionWithExpected(node, "isNotEqualTo")
+
+                    "assertTrue" -> replaceJunit4AssertionWithoutExpected(node, "isTrue")
+
+                    "assertFalse" -> replaceJunit4AssertionWithoutExpected(node, "isFalse")
+
+                    "assertNull" -> replaceJunit4AssertionWithoutExpected(node, "isNull")
+
+                    "assertNotNull" -> replaceJunit4AssertionWithoutExpected(node, "isNotNull")
+
+                    "assertSame" -> replaceJunit4AssertionWithExpected(node, "isSameAs")
+
+                    "assertNotSame" -> replaceJunit4AssertionWithExpected(node, "isNotSameAs")
+
+                    "assertArrayEquals" ->
+                        replaceJunit4AssertionWithExpected(node, "containsOnly") {
+                            append("*")
+                            append(it.sourcePsi!!.text)
+                        }
+
+                    "fail" -> {
+                        val messageExpr = node.valueArguments.firstOrNull()
+
+                        fix()
+                            .replace()
+                            .reformat(true)
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).with(
+                                buildString {
+                                    append("assertk.fail(")
+                                    if (messageExpr != null) {
+                                        append(messageExpr.sourcePsi!!.text)
+                                    }
+                                    append(")")
+                                },
+                            ).build()
+                    }
+
+                    else -> null
+                }
+
+            private fun replaceJunit4AssertionWithExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+                expectedTransformation: StringBuilder.(
+                    UExpression,
+                ) -> Unit = { append(it.sourcePsi!!.text) },
+            ): LintFix? {
+                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
+                val expectedExpr =
+                    call.valueArguments.getOrNull(expectedIndex) ?: return null
+                val actualExpr =
+                    call.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                return fix()
+                    .replace()
+                    .reformat(true)
+                    .range(
+                        context.getCallLocation(
+                            call,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
+                    .with(
+                        buildString {
+                            append("assertThat(")
+                            append(actualExpr.sourcePsi!!.text)
+                            append(").")
+                            append(assertionFunctionName)
+                            append("(")
+                            expectedTransformation(expectedExpr)
+                            append(")")
+
+                            if (call.valueArguments.size == 3) {
+                                append(" // ")
+                                append(
+                                    call.valueArguments
+                                        .first()
+                                        .sourcePsi!!
+                                        .text,
+                                )
+                            }
+                        },
+                    ).build()
+            }
+
+            private fun replaceJunit4AssertionWithoutExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+            ): LintFix? {
+                val actualIndex = if (call.valueArguments.size == 1) 0 else 1
+                val actualExpr =
+                    call.valueArguments.getOrNull(actualIndex) ?: return null
+
+                return fix()
+                    .replace()
+                    .reformat(true)
+                    .range(
+                        context.getCallLocation(
+                            call,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
+                    .with(
+                        buildString {
+                            append("assertThat(")
+                            append(actualExpr.sourcePsi!!.text)
+                            append(").")
+                            append(assertionFunctionName)
+                            append("()")
+
+                            if (call.valueArguments.size == 2) {
+                                append(" // ")
+                                append(
+                                    call.valueArguments
+                                        .first()
+                                        .sourcePsi!!
+                                        .text,
+                                )
+                            }
+                        },
+                    ).build()
             }
         }
 

@@ -4,6 +4,7 @@
 
 ### Added
 - Quick fixes for null check and equality tests for _UnusedAssertkAssertion_
+- Quick fixes for common junit 4 assertion cases detected by _TestFrameworkAssertionDetector_
 
 ### Changed
 
