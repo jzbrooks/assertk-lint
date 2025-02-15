@@ -817,7 +817,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 + import assertk.assertThat
 + import assertk.assertions.isFalse
 @@ -10 +12
--         assertTrue(canRead)
+-         assertFalse(canRead)
 +         assertThat(canRead).isFalse()""",
             )
     }
@@ -851,7 +851,65 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 + import assertk.assertions.isInstanceOf
 @@ -9 +11
 -         assertIs<File>(first)
-+         assertThat(first).isInstanceOf<java.io.File>()""",
++         assertThat(first).isInstanceOf<File>()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertIs as receiver not fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIs
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val readable = assertIs<File>(first).canRead
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs("")
+    }
+
+    @Test
+    fun `kotlin assertIsNot assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIsNot
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = "/usr/etc"
+                    assertIsNot<File>(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotInstanceOf<java.io.File>():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotInstanceOf
+@@ -9 +11
+-         assertIsNot<File>(first)
++         assertThat(first).isNotInstanceOf<File>()""",
             )
     }
 
@@ -1018,6 +1076,9 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
             inline fun <T> assertIs(value: Any?, message: String? = null): T {
                 return value as T
+            }
+
+            fun <T> assertIsNot(value: Any?, message: String? = null) {
             }
         """
     }
