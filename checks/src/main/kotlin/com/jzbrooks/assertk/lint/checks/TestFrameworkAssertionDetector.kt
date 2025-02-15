@@ -234,7 +234,11 @@ class TestFrameworkAssertionDetector :
 
             private fun buildKotlinTestQuickFix(node: UCallExpression): LintFix? =
                 when (node.methodName) {
-                    "assertEquals" -> replaceKotlinTestAssertionWithExpected(node, "isEqualTo")
+                    "assertEquals", "assertContentEquals" ->
+                        replaceKotlinTestAssertionWithExpected(
+                            node,
+                            "isEqualTo",
+                        )
                     "assertNotEquals" ->
                         replaceKotlinTestAssertionWithExpected(
                             node,

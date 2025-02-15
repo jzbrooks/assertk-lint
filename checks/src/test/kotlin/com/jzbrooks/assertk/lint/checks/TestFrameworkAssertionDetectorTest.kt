@@ -643,6 +643,40 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `kotlin assertContentEquals assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertContentEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = arrayOf(File(), File(), File())
+                    val second = arrayOf(File(), File(), File())
+                    assertContentEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertContentEquals(first, second)
++         assertThat(second).isEqualTo(first)""",
+            )
+    }
+
+    @Test
     fun `kotlin notEquals assertion fixed`() {
         val code =
             """
@@ -1138,6 +1172,9 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun <T> assertNotEquals(expected: T, actual: T) {
+            }
+
+            fun <T> assertContentEquals(expected: Iterable<T>?, actual: Iterable<T>?, message: String? = null) {
             }
 
             fun <T> assertSame(expected: T, actual: T) {
