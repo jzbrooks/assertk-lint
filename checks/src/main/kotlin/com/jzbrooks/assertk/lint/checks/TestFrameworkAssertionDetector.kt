@@ -59,6 +59,7 @@ class TestFrameworkAssertionDetector :
                             node,
                             context.getLocation(node),
                             "Use assertk assertions",
+                            buildKotlinTestQuickFix(node),
                         )
                     }
                 }
@@ -187,6 +188,69 @@ class TestFrameworkAssertionDetector :
                             append("()")
 
                             if (call.valueArguments.size == 2) {
+                                append(" // ")
+                                append(
+                                    call.valueArguments
+                                        .first()
+                                        .sourcePsi!!
+                                        .text,
+                                )
+                            }
+                        },
+                    ).build()
+            }
+
+            private fun buildKotlinTestQuickFix(node: UCallExpression): LintFix? =
+                when (node.methodIdentifier?.name) {
+                    "assertEquals" -> null
+                    "assertNotEquals" -> null
+                    "assertNull" -> null
+                    "assertNotNull" -> null
+                    "assertTrue" -> null
+                    "assertFalse" -> null
+                    "assertSame" -> null
+                    "assertNotSame" -> null
+                    "assertIs" -> null
+                    "assertNotIs" -> null
+                    "assertFails" -> null
+                    "fail" -> null
+                    else -> null
+                }
+
+            private fun replaceKotlinTestAssertionWithExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+                expectedTransformation: StringBuilder.(
+                    UExpression,
+                ) -> Unit = { append(it.sourcePsi!!.text) },
+            ): LintFix? {
+                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
+                val expectedExpr =
+                    call.valueArguments.getOrNull(expectedIndex) ?: return null
+                val actualExpr =
+                    call.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+
+                return fix()
+                    .replace()
+                    .reformat(true)
+                    .range(
+                        context.getCallLocation(
+                            call,
+                            includeReceiver = false,
+                            includeArguments = true,
+                        ),
+                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
+                    .with(
+                        buildString {
+                            append("assertThat(")
+                            append(actualExpr.sourcePsi!!.text)
+                            append(").")
+                            append(assertionFunctionName)
+                            append("(")
+                            expectedTransformation(expectedExpr)
+                            append(")")
+
+                            if (call.valueArguments.size == 3) {
                                 append(" // ")
                                 append(
                                     call.valueArguments
