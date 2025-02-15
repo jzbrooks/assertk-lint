@@ -457,6 +457,62 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `junit 4 fail fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail("This test should fail")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
+@@ -7 +7
+-         fail("This test should fail")
++         assertk.fail("This test should fail")""",
+            )
+    }
+
+    @Test
+    fun `junit 4 fail without message fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail()
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
+@@ -7 +7
+-         fail()
++         assertk.fail()""",
+            )
+    }
+
+    @Test
     fun `junit 5 assertion detected`() {
         val code =
             """
@@ -519,16 +575,19 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `junit 4 fail fixed`() {
+    fun `kotlin isEqualTo assertion fixed`() {
         val code =
             """
             package error
 
-            import org.junit.Assert.fail
+            import java.io.File
+            import kotlin.test.assertEquals
 
             class TestingTesting {
                 fun testingTest() {
-                    fail("This test should fail")
+                    val first = File()
+                    val second = File()
+                    assertEquals(first, second)
                 }
             }
             """.trimIndent()
@@ -536,23 +595,421 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
         lint()
             .files(
                 kotlin(code),
-                java(JUNIT_4_ASSERT_STUB),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
-@@ -7 +7
--         fail("This test should fail")
-+         assertk.fail("This test should fail")""",
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals(first, second)
++         assertThat(second).isEqualTo(first)""",
             )
     }
 
     @Test
-    fun `junit 4 fail without message fixed`() {
+    fun `kotlin isEqualTo with message assertion fixed`() {
         val code =
             """
             package error
 
-            import org.junit.Assert.fail
+            import java.io.File
+            import kotlin.test.assertEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertEquals(first, second, "They should be equal")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) // "They should be equal":
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals(first, second, "They should be equal")
++         assertThat(second).isEqualTo(first) // "They should be equal"""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertContentEquals assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertContentEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = arrayOf(File(), File(), File())
+                    val second = arrayOf(File(), File(), File())
+                    assertContentEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertContentEquals(first, second)
++         assertThat(second).isEqualTo(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin notEquals assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertNotEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotEqualTo
+@@ -10 +12
+-         assertNotEquals(first, second)
++         assertThat(second).isNotEqualTo(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertSame assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertSame
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertSame(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isSameAs(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isSameAs
+@@ -10 +12
+-         assertSame(first, second)
++         assertThat(second).isSameAs(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNotSame assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotSame
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertNotSame(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotSameAs
+@@ -10 +12
+-         assertNotSame(first, second)
++         assertThat(second).isNotSameAs(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNull assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first: File? = null
+                    assertNull(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNull():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNull
+@@ -9 +11
+-         assertNull(first)
++         assertThat(first).isNull()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNotNull assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first: File? = File()
+                    assertNotNull(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotNull():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotNull
+@@ -9 +11
+-         assertNotNull(first)
++         assertThat(first).isNotNull()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertTrue assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertTrue
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val canRead: Boolean = first.canRead
+                    assertTrue(canRead)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isTrue():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isTrue
+@@ -10 +12
+-         assertTrue(canRead)
++         assertThat(canRead).isTrue()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertFalse assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertFalse
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val canRead: Boolean = first.canRead
+                    assertFalse(canRead)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isFalse():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isFalse
+@@ -10 +12
+-         assertFalse(canRead)
++         assertThat(canRead).isFalse()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertIs assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIs
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    assertIs<File>(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isInstanceOf<java.io.File>():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isInstanceOf
+@@ -9 +11
+-         assertIs<File>(first)
++         assertThat(first).isInstanceOf<File>()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertIs as receiver not fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIs
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val readable = assertIs<File>(first).canRead
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs("")
+    }
+
+    @Test
+    fun `kotlin assertIsNot assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIsNot
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = "/usr/etc"
+                    assertIsNot<File>(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotInstanceOf<java.io.File>():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotInstanceOf
+@@ -9 +11
+-         assertIsNot<File>(first)
++         assertThat(first).isNotInstanceOf<File>()""",
+            )
+    }
+
+    @Test
+    fun `kotlin test fail without message fixed`() {
+        val code =
+            """
+            package error
+
+            import kotlin.test.fail
 
             class TestingTesting {
                 fun testingTest() {
@@ -564,13 +1021,69 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
         lint()
             .files(
                 kotlin(code),
-                java(JUNIT_4_ASSERT_STUB),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
 @@ -7 +7
 -         fail()
 +         assertk.fail()""",
+            )
+    }
+
+    @Test
+    fun `kotlin test fail with message fixed`() {
+        val code =
+            """
+            package error
+
+            import kotlin.test.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail("Uh oh!")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("Uh oh!"):
+@@ -7 +7
+-         fail("Uh oh!")
++         assertk.fail("Uh oh!")""",
+            )
+    }
+
+    @Test
+    fun `kotlin test fail with cause fixed`() {
+        val code =
+            """
+            package error
+
+            import kotlin.test.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail(cause = IllegalStateException())
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail(cause = IllegalStateException()):
+@@ -7 +7
+-         fail(cause = IllegalStateException())
++         assertk.fail(cause = IllegalStateException())""",
             )
     }
 
@@ -655,7 +1168,42 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
             package kotlin.test
 
-            fun <T> assertEquals(expected: T, actual: T) {
+            fun <T> assertEquals(expected: T, actual: T, message: String? = null) {
+            }
+
+            fun <T> assertNotEquals(expected: T, actual: T) {
+            }
+
+            fun <T> assertContentEquals(expected: Iterable<T>?, actual: Iterable<T>?, message: String? = null) {
+            }
+
+            fun <T> assertSame(expected: T, actual: T) {
+            }
+
+            fun <T> assertNotSame(expected: T, actual: T) {
+            }
+
+            fun assertNull(actual: Any?, message: String? = null) {
+            }
+
+            fun assertNotNull(actual: Any?) {
+            }
+
+            fun assertTrue(actual: Boolean) {
+            }
+
+            fun assertFalse(actual: Boolean) {
+            }
+
+            inline fun <T> assertIs(value: Any?, message: String? = null): T {
+                return value as T
+            }
+
+            fun <T> assertIsNot(value: Any?, message: String? = null) {
+            }
+
+            fun fail(message: String? = null, cause: Throwable? = null): Nothing {
+                throw AssertionError()
             }
         """
     }
