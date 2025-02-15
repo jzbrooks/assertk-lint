@@ -1,6 +1,7 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
+import com.android.tools.lint.checks.infrastructure.TestMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -711,13 +712,115 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNull():
 @@ -3 +3
 + import assertk.assertThat
-+ import assertk.assertions.isNotSameAs
++ import assertk.assertions.isNull
+@@ -9 +11
+-         assertNull(first)
++         assertThat(first).isNull()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNotNull assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first: File? = File()
+                    assertNotNull(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotNull():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotNull
+@@ -9 +11
+-         assertNotNull(first)
++         assertThat(first).isNotNull()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertTrue assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertTrue
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val canRead: Boolean = first.canRead
+                    assertTrue(canRead)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isTrue():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isTrue
 @@ -10 +12
--         assertNotSame(first, second)
-+         assertThat(second).isNotSameAs(first)""",
+-         assertTrue(canRead)
++         assertThat(canRead).isTrue()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertFalse assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertFalse
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val canRead: Boolean = first.canRead
+                    assertFalse(canRead)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).testModes(TestMode.IMPORT_ALIAS)
+            .run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isFalse():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isFalse
+@@ -10 +12
+-         assertTrue(canRead)
++         assertThat(canRead).isFalse()""",
             )
     }
 
@@ -868,6 +971,18 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun <T> assertNotSame(expected: T, actual: T) {
+            }
+
+            fun assertNull(actual: Any?, message: String? = null) {
+            }
+
+            fun assertNotNull(actual: Any?) {
+            }
+
+            fun assertTrue(actual: Boolean) {
+            }
+
+            fun assertFalse(actual: Boolean) {
             }
         """
     }

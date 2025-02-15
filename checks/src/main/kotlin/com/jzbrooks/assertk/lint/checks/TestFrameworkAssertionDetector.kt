@@ -9,6 +9,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
+import com.intellij.psi.PsiTypes
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -228,18 +229,38 @@ class TestFrameworkAssertionDetector :
                 )
             }
 
-            private fun buildKotlinTestQuickFix(node: UCallExpression): LintFix? =
-                when (node.methodIdentifier?.name) {
+            private fun buildKotlinTestQuickFix(node: UCallExpression): LintFix? {
+                val method = node.resolve() ?: return null
+                return when (method.name) {
                     "assertEquals" -> replaceKotlinTestAssertionWithExpected(node, "isEqualTo")
                     "assertNotEquals" ->
                         replaceKotlinTestAssertionWithExpected(
                             node,
                             "isNotEqualTo",
                         )
+
                     "assertNull" -> replaceKotlinTestAssertionWithoutExpected(node, "isNull")
                     "assertNotNull" -> replaceKotlinTestAssertionWithoutExpected(node, "isNotNull")
-                    "assertTrue" -> replaceKotlinTestAssertionWithoutExpected(node, "isTrue")
-                    "assertFalse" -> replaceKotlinTestAssertionWithoutExpected(node, "isFalse")
+                    "assertTrue" -> {
+                        val firstArgType = node.getArgumentForParameter(0)?.getExpressionType()
+
+                        if (PsiTypes.booleanType() == firstArgType) {
+                            replaceKotlinTestAssertionWithoutExpected(node, "isTrue")
+                        } else {
+                            null
+                        }
+                    }
+
+                    "assertFalse" -> {
+                        val firstArgType = node.getArgumentForParameter(0)?.getExpressionType()
+
+                        if (PsiTypes.booleanType() == firstArgType) {
+                            replaceKotlinTestAssertionWithoutExpected(node, "isFalse")
+                        } else {
+                            null
+                        }
+                    }
+
                     "assertSame" -> replaceKotlinTestAssertionWithExpected(node, "isSameAs")
                     "assertNotSame" -> replaceKotlinTestAssertionWithExpected(node, "isNotSameAs")
                     "assertIs" -> null
@@ -248,6 +269,7 @@ class TestFrameworkAssertionDetector :
                     "fail" -> null
                     else -> null
                 }
+            }
 
             private fun replaceKotlinTestAssertionWithExpected(
                 call: UCallExpression,
