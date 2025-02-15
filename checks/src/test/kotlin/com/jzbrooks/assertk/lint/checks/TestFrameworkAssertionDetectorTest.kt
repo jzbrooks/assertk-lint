@@ -519,6 +519,209 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `kotlin isEqualTo assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals(first, second)
++         assertThat(second).isEqualTo(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin isEqualTo with message assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertEquals(first, second, "They should be equal")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) // "They should be equal":
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isEqualTo
+@@ -10 +12
+-         assertEquals(first, second, "They should be equal")
++         assertThat(second).isEqualTo(first) // "They should be equal"""",
+            )
+    }
+
+    @Test
+    fun `kotlin notEquals assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotEquals
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertNotEquals(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotEqualTo
+@@ -10 +12
+-         assertNotEquals(first, second)
++         assertThat(second).isNotEqualTo(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertSame assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertSame
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertSame(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isSameAs(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isSameAs
+@@ -10 +12
+-         assertSame(first, second)
++         assertThat(second).isSameAs(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNotSame assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNotSame
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+                    assertNotSame(first, second)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotSameAs
+@@ -10 +12
+-         assertNotSame(first, second)
++         assertThat(second).isNotSameAs(first)""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertNull assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertNull
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first: File? = null
+                    assertNull(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isNotSameAs
+@@ -10 +12
+-         assertNotSame(first, second)
++         assertThat(second).isNotSameAs(first)""",
+            )
+    }
+
+    @Test
     fun `junit 4 fail fixed`() {
         val code =
             """
@@ -655,7 +858,16 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
             package kotlin.test
 
-            fun <T> assertEquals(expected: T, actual: T) {
+            fun <T> assertEquals(expected: T, actual: T, message: String? = null) {
+            }
+
+            fun <T> assertNotEquals(expected: T, actual: T) {
+            }
+
+            fun <T> assertSame(expected: T, actual: T) {
+            }
+
+            fun <T> assertNotSame(expected: T, actual: T) {
             }
         """
     }

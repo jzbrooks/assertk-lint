@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.Severity
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.ULiteralExpression
 import java.util.EnumSet
 
 class TestFrameworkAssertionDetector :
@@ -115,20 +116,17 @@ class TestFrameworkAssertionDetector :
                     else -> null
                 }
 
-            private fun replaceJunit4AssertionWithExpected(
+            private fun createFixWithExpected(
                 call: UCallExpression,
                 assertionFunctionName: String,
+                expectedExpr: UExpression,
+                actualExpr: UExpression,
+                messageExpr: UExpression?,
                 expectedTransformation: StringBuilder.(
                     UExpression,
                 ) -> Unit = { append(it.sourcePsi!!.text) },
-            ): LintFix? {
-                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
-                val expectedExpr =
-                    call.valueArguments.getOrNull(expectedIndex) ?: return null
-                val actualExpr =
-                    call.valueArguments.getOrNull(expectedIndex + 1) ?: return null
-
-                return fix()
+            ): LintFix? =
+                fix()
                     .replace()
                     .reformat(true)
                     .range(
@@ -148,28 +146,20 @@ class TestFrameworkAssertionDetector :
                             expectedTransformation(expectedExpr)
                             append(")")
 
-                            if (call.valueArguments.size == 3) {
+                            if (messageExpr != null) {
                                 append(" // ")
-                                append(
-                                    call.valueArguments
-                                        .first()
-                                        .sourcePsi!!
-                                        .text,
-                                )
+                                append(messageExpr.sourcePsi!!.text)
                             }
                         },
                     ).build()
-            }
 
-            private fun replaceJunit4AssertionWithoutExpected(
+            private fun createFixWithoutExpected(
                 call: UCallExpression,
                 assertionFunctionName: String,
-            ): LintFix? {
-                val actualIndex = if (call.valueArguments.size == 1) 0 else 1
-                val actualExpr =
-                    call.valueArguments.getOrNull(actualIndex) ?: return null
-
-                return fix()
+                actualExpr: UExpression,
+                messageExpr: UExpression?,
+            ): LintFix? =
+                fix()
                     .replace()
                     .reformat(true)
                     .range(
@@ -187,29 +177,71 @@ class TestFrameworkAssertionDetector :
                             append(assertionFunctionName)
                             append("()")
 
-                            if (call.valueArguments.size == 2) {
+                            if (messageExpr != null) {
                                 append(" // ")
-                                append(
-                                    call.valueArguments
-                                        .first()
-                                        .sourcePsi!!
-                                        .text,
-                                )
+                                append(messageExpr.sourcePsi!!.text)
                             }
                         },
                     ).build()
+
+            private fun replaceJunit4AssertionWithExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+                expectedTransformation: StringBuilder.(
+                    UExpression,
+                ) -> Unit = { append(it.sourcePsi!!.text) },
+            ): LintFix? {
+                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
+                val expectedExpr = call.getArgumentForParameter(expectedIndex) ?: return null
+                val actualExpr = call.getArgumentForParameter(expectedIndex + 1) ?: return null
+                val messageExpr =
+                    call
+                        .getArgumentForParameter(0)
+                        .takeIf { call.valueArguments.size == 3 }
+
+                return createFixWithExpected(
+                    call,
+                    assertionFunctionName,
+                    expectedExpr,
+                    actualExpr,
+                    messageExpr,
+                    expectedTransformation,
+                )
+            }
+
+            private fun replaceJunit4AssertionWithoutExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+            ): LintFix? {
+                val actualIndex = if (call.valueArguments.size == 1) 0 else 1
+                val actualExpr = call.getArgumentForParameter(actualIndex) ?: return null
+                val messageExpr =
+                    call
+                        .getArgumentForParameter(0)
+                        .takeIf { call.valueArguments.size == 2 }
+
+                return createFixWithoutExpected(
+                    call,
+                    assertionFunctionName,
+                    actualExpr,
+                    messageExpr,
+                )
             }
 
             private fun buildKotlinTestQuickFix(node: UCallExpression): LintFix? =
                 when (node.methodIdentifier?.name) {
-                    "assertEquals" -> null
-                    "assertNotEquals" -> null
-                    "assertNull" -> null
-                    "assertNotNull" -> null
-                    "assertTrue" -> null
-                    "assertFalse" -> null
-                    "assertSame" -> null
-                    "assertNotSame" -> null
+                    "assertEquals" -> replaceKotlinTestAssertionWithExpected(node, "isEqualTo")
+                    "assertNotEquals" ->
+                        replaceKotlinTestAssertionWithExpected(
+                            node,
+                            "isNotEqualTo",
+                        )
+                    "assertNull" -> replaceKotlinTestAssertionWithoutExpected(node, "isNull")
+                    "assertNotNull" -> replaceKotlinTestAssertionWithoutExpected(node, "isNotNull")
+                    "assertTrue" -> replaceKotlinTestAssertionWithoutExpected(node, "isTrue")
+                    "assertFalse" -> replaceKotlinTestAssertionWithoutExpected(node, "isFalse")
+                    "assertSame" -> replaceKotlinTestAssertionWithExpected(node, "isSameAs")
+                    "assertNotSame" -> replaceKotlinTestAssertionWithExpected(node, "isNotSameAs")
                     "assertIs" -> null
                     "assertNotIs" -> null
                     "assertFails" -> null
@@ -224,43 +256,37 @@ class TestFrameworkAssertionDetector :
                     UExpression,
                 ) -> Unit = { append(it.sourcePsi!!.text) },
             ): LintFix? {
-                val expectedIndex = if (call.valueArguments.size == 2) 0 else 1
-                val expectedExpr =
-                    call.valueArguments.getOrNull(expectedIndex) ?: return null
-                val actualExpr =
-                    call.valueArguments.getOrNull(expectedIndex + 1) ?: return null
+                val expectedExpr = call.getArgumentForParameter(0) ?: return null
+                val actualExpr = call.getArgumentForParameter(1) ?: return null
 
-                return fix()
-                    .replace()
-                    .reformat(true)
-                    .range(
-                        context.getCallLocation(
-                            call,
-                            includeReceiver = false,
-                            includeArguments = true,
-                        ),
-                    ).imports("assertk.assertThat", "assertk.assertions.$assertionFunctionName")
-                    .with(
-                        buildString {
-                            append("assertThat(")
-                            append(actualExpr.sourcePsi!!.text)
-                            append(").")
-                            append(assertionFunctionName)
-                            append("(")
-                            expectedTransformation(expectedExpr)
-                            append(")")
+                return createFixWithExpected(
+                    call,
+                    assertionFunctionName,
+                    expectedExpr,
+                    actualExpr,
+                    call.getArgumentForParameter(2).takeIf {
+                        (it as? ULiteralExpression)?.isNull != true
+                    },
+                    expectedTransformation,
+                )
+            }
 
-                            if (call.valueArguments.size == 3) {
-                                append(" // ")
-                                append(
-                                    call.valueArguments
-                                        .first()
-                                        .sourcePsi!!
-                                        .text,
-                                )
-                            }
-                        },
-                    ).build()
+            private fun replaceKotlinTestAssertionWithoutExpected(
+                call: UCallExpression,
+                assertionFunctionName: String,
+            ): LintFix? {
+                val actualExpr = call.getArgumentForParameter(0) ?: return null
+                val messageExpr =
+                    call.getArgumentForParameter(1).takeIf {
+                        (it as? ULiteralExpression)?.isNull != true
+                    }
+
+                return createFixWithoutExpected(
+                    call,
+                    assertionFunctionName,
+                    actualExpr,
+                    messageExpr,
+                )
             }
         }
 
