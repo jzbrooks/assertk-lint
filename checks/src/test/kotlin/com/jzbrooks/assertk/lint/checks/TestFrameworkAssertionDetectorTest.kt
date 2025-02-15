@@ -457,6 +457,62 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `junit 4 fail fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail("This test should fail")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
+@@ -7 +7
+-         fail("This test should fail")
++         assertk.fail("This test should fail")""",
+            )
+    }
+
+    @Test
+    fun `junit 4 fail without message fixed`() {
+        val code =
+            """
+            package error
+
+            import org.junit.Assert.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail()
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                java(JUNIT_4_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
+@@ -7 +7
+-         fail()
++         assertk.fail()""",
+            )
+    }
+
+    @Test
     fun `junit 5 assertion detected`() {
         val code =
             """
@@ -914,40 +970,12 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
-    fun `junit 4 fail fixed`() {
+    fun `kotlin test fail without message fixed`() {
         val code =
             """
             package error
 
-            import org.junit.Assert.fail
-
-            class TestingTesting {
-                fun testingTest() {
-                    fail("This test should fail")
-                }
-            }
-            """.trimIndent()
-
-        lint()
-            .files(
-                kotlin(code),
-                java(JUNIT_4_ASSERT_STUB),
-            ).run()
-            .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
-@@ -7 +7
--         fail("This test should fail")
-+         assertk.fail("This test should fail")""",
-            )
-    }
-
-    @Test
-    fun `junit 4 fail without message fixed`() {
-        val code =
-            """
-            package error
-
-            import org.junit.Assert.fail
+            import kotlin.test.fail
 
             class TestingTesting {
                 fun testingTest() {
@@ -959,13 +987,69 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
         lint()
             .files(
                 kotlin(code),
-                java(JUNIT_4_ASSERT_STUB),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
 @@ -7 +7
 -         fail()
 +         assertk.fail()""",
+            )
+    }
+
+    @Test
+    fun `kotlin test fail with message fixed`() {
+        val code =
+            """
+            package error
+
+            import kotlin.test.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail("Uh oh!")
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("Uh oh!"):
+@@ -7 +7
+-         fail("Uh oh!")
++         assertk.fail("Uh oh!")""",
+            )
+    }
+
+    @Test
+    fun `kotlin test fail with cause fixed`() {
+        val code =
+            """
+            package error
+
+            import kotlin.test.fail
+
+            class TestingTesting {
+                fun testingTest() {
+                    fail(cause = IllegalStateException())
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail(cause = IllegalStateException()):
+@@ -7 +7
+-         fail(cause = IllegalStateException())
++         assertk.fail(cause = IllegalStateException())""",
             )
     }
 
@@ -1079,6 +1163,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun <T> assertIsNot(value: Any?, message: String? = null) {
+            }
+
+            fun fail(message: String? = null, cause: Throwable? = null): Nothing {
+                throw AssertionError()
             }
         """
     }

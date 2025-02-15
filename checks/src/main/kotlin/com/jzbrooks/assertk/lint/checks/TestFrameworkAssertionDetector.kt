@@ -284,8 +284,37 @@ class TestFrameworkAssertionDetector :
                         }
                     }
                     "assertIsNot" -> replaceKotlinTestTypeAssertion(node, "isNotInstanceOf")
-                    "assertFails" -> null
-                    "fail" -> null
+                    "fail" -> {
+                        val messageExpr = node.getArgumentForParameter(0)
+                        val causeExpr = node.getArgumentForParameter(1)
+
+                        fix()
+                            .replace()
+                            .reformat(true)
+                            .shortenNames()
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).with(
+                                buildString {
+                                    append("assertk.fail(")
+                                    if (messageExpr != null) {
+                                        append(messageExpr.sourcePsi!!.text)
+                                    }
+                                    if (messageExpr != null && causeExpr != null) {
+                                        append(", ")
+                                    }
+                                    if (causeExpr != null) {
+                                        append("cause = ")
+                                        append(causeExpr.sourcePsi!!.text)
+                                    }
+                                    append(")")
+                                },
+                            ).build()
+                    }
                     else -> null
                 }
 
