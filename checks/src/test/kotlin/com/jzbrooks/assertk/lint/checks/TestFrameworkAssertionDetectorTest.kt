@@ -1,7 +1,6 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -811,8 +810,7 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             .files(
                 kotlin(code),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
-            ).testModes(TestMode.IMPORT_ALIAS)
-            .run()
+            ).run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isFalse():
 @@ -3 +3
@@ -821,6 +819,39 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 @@ -10 +12
 -         assertTrue(canRead)
 +         assertThat(canRead).isFalse()""",
+            )
+    }
+
+    @Test
+    fun `kotlin assertIs assertion fixed`() {
+        val code =
+            """
+            package error
+
+            import java.io.File
+            import kotlin.test.assertIs
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    assertIs<File>(first)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(code),
+                kotlin(KOTLIN_TEST_ASSERT_STUB),
+            ).run()
+            .expectFixDiffs(
+                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isInstanceOf<java.io.File>():
+@@ -3 +3
++ import assertk.assertThat
++ import assertk.assertions.isInstanceOf
+@@ -9 +11
+-         assertIs<File>(first)
++         assertThat(first).isInstanceOf<java.io.File>()""",
             )
     }
 
@@ -983,6 +1014,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             }
 
             fun assertFalse(actual: Boolean) {
+            }
+
+            inline fun <T> assertIs(value: Any?, message: String? = null): T {
+                return value as T
             }
         """
     }

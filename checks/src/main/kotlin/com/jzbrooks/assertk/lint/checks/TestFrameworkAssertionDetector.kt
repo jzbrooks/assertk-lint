@@ -263,7 +263,43 @@ class TestFrameworkAssertionDetector :
 
                     "assertSame" -> replaceKotlinTestAssertionWithExpected(node, "isSameAs")
                     "assertNotSame" -> replaceKotlinTestAssertionWithExpected(node, "isNotSameAs")
-                    "assertIs" -> null
+                    "assertIs" -> {
+                        val typeArg = node.typeArguments.firstOrNull() ?: return null
+                        val actualExpr = node.getArgumentForParameter(0) ?: return null
+                        val messageExpr =
+                            node.getArgumentForParameter(1).takeIf {
+                                (it as? ULiteralExpression)?.isNull != true
+                            }
+
+                        // todo: check that the call expression isn't immediately used as a receiver
+                        // todo: double check that canonical text will be cleaned up by the reformat step
+                        //    the ast guide suggest qualifying class names and notes that imports
+                        //    is primarily intended for situations where that isn't possible
+                        fix()
+                            .replace()
+                            .reformat(true)
+                            .range(
+                                context.getCallLocation(
+                                    node,
+                                    includeReceiver = false,
+                                    includeArguments = true,
+                                ),
+                            ).imports("assertk.assertThat", "assertk.assertions.isInstanceOf")
+                            .with(
+                                buildString {
+                                    append("assertThat(")
+                                    append(actualExpr.sourcePsi!!.text)
+                                    append(").isInstanceOf<")
+                                    append(typeArg.canonicalText)
+                                    append(">()")
+
+                                    if (messageExpr != null) {
+                                        append(" // ")
+                                        append(messageExpr.sourcePsi!!.text)
+                                    }
+                                },
+                            ).build()
+                    }
                     "assertNotIs" -> null
                     "assertFails" -> null
                     "fail" -> null
