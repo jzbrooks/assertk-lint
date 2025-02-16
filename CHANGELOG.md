@@ -8,8 +8,6 @@
 - Quick fixes for common junit 4 assertions detected by _TestFrameworkAssertionDetector_
 - Quick fixes for common kotlin.test assertions cases detected by _TestFrameworkAssertionDetector_
 
-### Changed
-
 ### Fixed
 - Fully qualified method calls are handled
 
