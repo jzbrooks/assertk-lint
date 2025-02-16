@@ -9,7 +9,7 @@
 - Quick fixes for common kotlin.test assertions cases detected by _TestFrameworkAssertionDetector_
 
 ### Fixed
-- Fully qualified method calls are handled
+- Fully qualified function call handling is improved across several detectors
 
 ## 1.4.0 - 2024-12-23
 
