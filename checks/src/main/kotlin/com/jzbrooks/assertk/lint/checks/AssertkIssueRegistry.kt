@@ -13,6 +13,7 @@ class AssertkIssueRegistry : IssueRegistry() {
             CollectionAssertionDetector.SIZE_READ_ISSUE,
             GoogleTruthDetector.ISSUE,
             IndexDetector.ISSUE,
+            KotlinAssertionDetector.ISSUE,
             MapAssertionDetector.DIRECT_READ_ISSUE,
             MapAssertionDetector.KEYS_SET_ABSENT_ISSUE,
             MapAssertionDetector.KEYS_SET_PRESENT_ISSUE,
