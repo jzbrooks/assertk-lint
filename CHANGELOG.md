@@ -3,6 +3,16 @@
 ## Unreleased
 
 ### Added
+
+### Changed
+
+### Removed
+
+### Fixed
+
+## 1.5.0 - 2025-02-16
+
+### Added
 - _KotlinAssertionDetector_ prohibits use of `kotlin.assert` in tests
 - Quick fixes for null check and equality tests for _UnusedAssertkAssertion_
 - Quick fixes for common junit 4 assertions detected by _TestFrameworkAssertionDetector_
