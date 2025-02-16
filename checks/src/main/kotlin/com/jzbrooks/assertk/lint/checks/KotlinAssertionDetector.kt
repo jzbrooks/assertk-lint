@@ -46,7 +46,6 @@ class KotlinAssertionDetector :
                         fix()
                             .replace()
                             .reformat(true)
-                            .shortenNames()
                             .range(
                                 context.getCallLocation(
                                     node,
