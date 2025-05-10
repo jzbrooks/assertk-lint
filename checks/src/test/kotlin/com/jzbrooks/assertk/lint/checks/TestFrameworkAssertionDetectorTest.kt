@@ -1,6 +1,7 @@
 package com.jzbrooks.assertk.lint.checks
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
+import com.android.tools.lint.checks.infrastructure.TestMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -180,7 +181,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             .files(
                 kotlin(code),
                 java(JUNIT_4_ASSERT_STUB),
-            ).run()
+            )
+            // https://issuetracker.google.com/issues/416873248
+            .skipTestModes(TestMode.PARENTHESIZED)
+            .run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) // "The files are in the computer":
 @@ -3 +3
@@ -246,7 +250,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             .files(
                 kotlin(code),
                 java(JUNIT_4_ASSERT_STUB),
-            ).run()
+            )
+            // https://issuetracker.google.com/issues/416873248
+            .skipTestModes(TestMode.PARENTHESIZED)
+            .run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isTrue() // "Should be true":
 @@ -3 +3
@@ -630,7 +637,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             .files(
                 kotlin(code),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
-            ).run()
+            )
+            // https://issuetracker.google.com/issues/416873248
+            .skipTestModes(TestMode.PARENTHESIZED)
+            .run()
             .expectFixDiffs(
                 """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) // "They should be equal":
 @@ -3 +3
