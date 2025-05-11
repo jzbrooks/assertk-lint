@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Quick fixes for _TestFrameworkAssertionDetector_ relocate `message` assertion parameters to comments in a more robust manner
+
 ## 1.5.0 - 2025-02-16
 
 ### Added

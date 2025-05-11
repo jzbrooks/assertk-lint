@@ -129,7 +129,7 @@ class TestFrameworkAssertionDetector :
                 expectedTransformation: StringBuilder.(
                     UExpression,
                 ) -> Unit = { append(it.sourcePsi!!.text) },
-            ): LintFix? =
+            ): LintFix =
                 fix()
                     .replace()
                     .reformat(true)
@@ -151,8 +151,9 @@ class TestFrameworkAssertionDetector :
                             append(")")
 
                             if (messageExpr != null) {
-                                append(" // ")
+                                append(" /* ")
                                 append(messageExpr.sourcePsi!!.text)
+                                append(" */")
                             }
                         },
                     ).build()
@@ -162,7 +163,7 @@ class TestFrameworkAssertionDetector :
                 assertionFunctionName: String,
                 actualExpr: UExpression,
                 messageExpr: UExpression?,
-            ): LintFix? =
+            ): LintFix =
                 fix()
                     .replace()
                     .reformat(true)
@@ -182,8 +183,9 @@ class TestFrameworkAssertionDetector :
                             append("()")
 
                             if (messageExpr != null) {
-                                append(" // ")
+                                append(" /* ")
                                 append(messageExpr.sourcePsi!!.text)
+                                append(" */")
                             }
                         },
                     ).build()
@@ -395,8 +397,9 @@ class TestFrameworkAssertionDetector :
                             append(">()")
 
                             if (messageExpr != null) {
-                                append(" // ")
+                                append(" /* ")
                                 append(messageExpr.sourcePsi!!.text)
+                                append(" */")
                             }
                         },
                     ).build()
