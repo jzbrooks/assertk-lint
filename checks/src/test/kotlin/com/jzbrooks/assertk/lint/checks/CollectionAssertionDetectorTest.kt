@@ -32,7 +32,15 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -54,10 +62,15 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint()
-            .files(kotlin(code), *ASSERTK_STUBS)
-            .run()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
             .expect(
-                """src/clean/TestingTesting.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Use hasSize assertion [CollectionSizeAssertion]
         assertThat(list.size).isEqualTo(3)
         ~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -85,10 +98,15 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             """.trimIndent()
 
         lint()
-            .files(kotlin(code), *ASSERTK_STUBS)
-            .run()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
             .expect(
-                """src/clean/TestSubjectHolder.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Use hasSize assertion [CollectionSizeAssertion]
         assertThat(holder.list.size).isEqualTo(3)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -113,7 +131,15 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -134,14 +160,22 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/TestingTesting.kt line 10: Replace size equality comparison with hasSize assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace size equality comparison with hasSize assertion:
 @@ -4 +4
 + import assertk.assertions.hasSize
 @@ -10 +11
 -         assertThat(list.size).isEqualTo(3)
 +         assertThat(list).hasSize(3)""",
-        )
+            )
     }
 
     @Test
@@ -164,13 +198,21 @@ class CollectionAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/TestSubjectHolder.kt line 12: Replace size equality comparison with hasSize assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 12: Replace size equality comparison with hasSize assertion:
 @@ -4 +4
 + import assertk.assertions.hasSize
 @@ -12 +13
 -         assertThat(holder.list.size).isEqualTo(3)
 +         assertThat(holder.list).hasSize(3)""",
-        )
+            )
     }
 }

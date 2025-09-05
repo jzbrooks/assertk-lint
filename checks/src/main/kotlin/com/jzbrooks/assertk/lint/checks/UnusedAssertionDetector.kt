@@ -33,6 +33,8 @@ class UnusedAssertionDetector :
         node: UCallExpression,
         method: PsiMethod,
     ) {
+        if (!context.isTestSource) return
+
         val containingClass = method.containingClass
         val evaluator = context.evaluator
 

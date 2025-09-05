@@ -10,6 +10,7 @@ import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.intellij.psi.PsiTypes
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -27,15 +28,16 @@ class TestFrameworkAssertionDetector :
             UCallExpression::class.java,
         )
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
+
+        return object : UElementHandler() {
             private val junit4 = "org.junit.Assert"
             private val junit5 = "org.junit.jupiter.api.Assertions"
             private val kotlinTest = "kotlin.test.AssertionsKt__AssertionsKt"
 
             override fun visitCallExpression(node: UCallExpression) {
-                if (!node.isKotlin) return
-
                 val psiMethod = node.resolve()
 
                 when {
@@ -241,6 +243,7 @@ class TestFrameworkAssertionDetector :
                             node,
                             "isEqualTo",
                         )
+
                     "assertNotEquals" ->
                         replaceKotlinTestAssertionWithExpected(
                             node,
@@ -289,6 +292,7 @@ class TestFrameworkAssertionDetector :
                             null
                         }
                     }
+
                     "assertIsNot" -> replaceKotlinTestTypeAssertion(node, "isNotInstanceOf")
                     "fail" -> {
                         val messageExpr = node.getArgumentForParameter(0)
@@ -321,6 +325,7 @@ class TestFrameworkAssertionDetector :
                                 },
                             ).build()
                     }
+
                     else -> null
                 }
 
@@ -405,6 +410,7 @@ class TestFrameworkAssertionDetector :
                     ).build()
             }
         }
+    }
 
     companion object {
         @JvmField

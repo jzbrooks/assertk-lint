@@ -30,7 +30,14 @@ class AssertJDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -80,12 +87,15 @@ class AssertJDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(ASSERTJ_STUB),
                 java(ASSERTION_STUB),
             ).run()
             .expect(
-                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [AssertJUse]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Use assertk assertions [AssertJUse]
         assertThat(first).isEqualTo(second)
         ~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",

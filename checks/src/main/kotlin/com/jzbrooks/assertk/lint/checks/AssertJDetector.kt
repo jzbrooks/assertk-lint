@@ -8,6 +8,7 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import java.util.EnumSet
@@ -20,11 +21,12 @@ class AssertJDetector :
             UCallExpression::class.java,
         )
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
-            override fun visitCallExpression(node: UCallExpression) {
-                if (!node.isKotlin) return
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
 
+        return object : UElementHandler() {
+            override fun visitCallExpression(node: UCallExpression) {
                 val psiMethod = node.resolve()
 
                 if (context.evaluator.isMemberInClass(psiMethod, ASSERTJ_ASSERTION_FQCN)) {
@@ -37,6 +39,7 @@ class AssertJDetector :
                 }
             }
         }
+    }
 
     companion object {
         @JvmField

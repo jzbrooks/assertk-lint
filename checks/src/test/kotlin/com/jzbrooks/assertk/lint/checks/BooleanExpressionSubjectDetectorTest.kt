@@ -33,7 +33,15 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -53,12 +61,20 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:9: Warning: Use built-in nullability assertions [NullComparisonAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:9: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(name == null).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -81,12 +97,20 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(null == name).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -109,12 +133,20 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Use built-in nullability assertions [NullComparisonAssertion]
         assertThat(name != null).isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -134,14 +166,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace null comparison with null assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace null comparison with null assertion:
 @@ -4 +4
 + import assertk.assertions.isNotNull
 @@ -9 +10
 -         assertThat(name != null).isTrue()
 +         assertThat(name).isNotNull()""",
-        )
+            )
     }
 
     @Test
@@ -161,14 +201,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace null comparison with null assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace null comparison with null assertion:
 @@ -4 +4
 + import assertk.assertions.isNull
 @@ -9 +10
 -         assertThat(name == null).isTrue()
 +         assertThat(name).isNull()""",
-        )
+            )
     }
 
     @Test
@@ -188,14 +236,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace null comparison with null assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace null comparison with null assertion:
 @@ -5 +5
 + import assertk.assertions.isNull
 @@ -9 +10
 -         assertThat(name != null).isFalse()
 +         assertThat(name).isNull()""",
-        )
+            )
     }
 
     @Test
@@ -215,14 +271,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace null comparison with null assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace null comparison with null assertion:
 @@ -5 +5
 + import assertk.assertions.isNotNull
 @@ -9 +10
 -         assertThat(name == null).isFalse()
 +         assertThat(name).isNotNull()""",
-        )
+            )
     }
 
     @Test
@@ -242,7 +306,15 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -262,12 +334,20 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:9: Warning: Use equality assertions [EqualityComparisonAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:9: Warning: Use equality assertions [EqualityComparisonAssertion]
         assertThat(name == "Test").isFalse()
         ~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -287,14 +367,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -4 +4
 + import assertk.assertions.isNotEqualTo
 @@ -9 +10
 -         assertThat(name != "Test").isTrue()
 +         assertThat(name).isNotEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -314,14 +402,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat(name == "Test").isTrue()
 +         assertThat(name).isEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -341,14 +437,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -5 +5
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat(name != "Test").isFalse()
 +         assertThat(name).isEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -368,14 +472,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -5 +5
 + import assertk.assertions.isNotEqualTo
 @@ -9 +10
 -         assertThat(name == "Test").isFalse()
 +         assertThat(name).isNotEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -395,14 +507,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat("Test" == name).isTrue()
 +         assertThat(name).isEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -422,14 +542,22 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat("Test ${'$'}{System.identityHashCode(name)}" == name).isTrue()
 +         assertThat(name).isEqualTo("Test ${'$'}{System.identityHashCode(name)}")""",
-        )
+            )
     }
 
     @Test
@@ -449,13 +577,21 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace equality check with equality assertion:
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace equality check with equality assertion:
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat(System.identityHashCode(name) == (0..10).random()).isTrue()
 +         assertThat(System.identityHashCode(name)).isEqualTo((0..10).random())""",
-        )
+            )
     }
 }

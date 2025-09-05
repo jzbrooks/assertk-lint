@@ -36,12 +36,21 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use assertk.assertFailure [TryCatchAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Use assertk.assertFailure [TryCatchAssertion]
         try {
         ^
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -68,12 +77,21 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:12: Warning: Use assertk.assertFailure [TryCatchAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Use assertk.assertFailure [TryCatchAssertion]
         try {
         ^
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -104,12 +122,21 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expect(
-            """src/clean/Testing.kt:14: Warning: Use assertk.assertFailure [TryCatchAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:14: Warning: Use assertk.assertFailure [TryCatchAssertion]
         try {
         ^
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -138,7 +165,16 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -165,7 +201,16 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -194,7 +239,16 @@ class TryCatchDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), kotlin(throwingStub), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(throwingStub),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     companion object {
