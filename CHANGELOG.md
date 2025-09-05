@@ -2,20 +2,36 @@
 
 ## Unreleased
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 1.5.1 - 2025-09-05
+
 ### Fixed
 
 - Detectors avoid signaling failures in production code
-- Quick fixes for _TestFrameworkAssertionDetector_ relocate `message` assertion parameters to comments in a more robust manner
+- Quick fixes for _TestFrameworkAssertionDetector_ relocate message
 
 ## 1.5.0 - 2025-02-16
 
 ### Added
+
 - _KotlinAssertionDetector_ prohibits use of `kotlin.assert` in tests
 - Quick fixes for null check and equality tests for _UnusedAssertkAssertion_
 - Quick fixes for common junit 4 assertions detected by _TestFrameworkAssertionDetector_
 - Quick fixes for common kotlin.test assertions cases detected by _TestFrameworkAssertionDetector_
 
 ### Fixed
+
 - Fully qualified function call handling is improved across several detectors
 
 ## 1.4.0 - 2024-12-23
