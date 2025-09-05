@@ -27,7 +27,21 @@ class KotlinAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(
+                    """
+            package kotlin
+            class PreconditionsKt__AssertionsJVMKt {
+               fun assert(condition: Boolean) {}
+            }""",
+                ),
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -46,12 +60,26 @@ class KotlinAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expect(
-            """src/error/TestingTesting.kt:8: Warning: Kotlin assertion is used [KotlinAssertionUse]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(
+                    """
+            package kotlin
+            class PreconditionsKt__AssertionsJVMKt {
+               fun assert(condition: Boolean) {}
+            }""",
+                ),
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:8: Warning: Kotlin assertion is used [KotlinAssertionUse]
         assert(first.canRead)
         ~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
-        )
+            )
     }
 
     @Test
@@ -70,14 +98,29 @@ class KotlinAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expectFixDiffs(
-            """Fix for src/error/TestingTesting.kt line 8: Replace with assertThat(first.canRead).isTrue():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                kotlin(
+                    """
+                    package kotlin
+                    class PreconditionsKt__AssertionsJVMKt {
+                       fun assert(condition: Boolean) {}
+                    }
+                    """.trimIndent(),
+                ),
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace with assertThat(first.canRead).isTrue():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isTrue
 @@ -8 +10
 -         assert(first.canRead)
 +         assertThat(first.canRead).isTrue()""",
-        )
+            )
     }
 }

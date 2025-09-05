@@ -33,7 +33,15 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -47,6 +55,7 @@ class IndexDetectorTest : LintDetectorTest() {
             import assertk.assertions.isEqualTo
 
             class TestingTesting {
+                @Test
                 fun testingTest() {
                     val array = arrayOf(10, 100, 1_000)
 
@@ -55,7 +64,15 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -77,14 +94,22 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """
-            src/clean/TestingTesting.kt:11: Warning: Index with assertk assertions [UseIndexAssertion]
-                    assertThat(array[2]).isEqualTo(1_000)
-                               ~~~~~~~~
-            0 errors, 1 warnings
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """
+                test/kotlin/test/pkg/UnitTestKotlin.kt:11: Warning: Index with assertk assertions [UseIndexAssertion]
+                        assertThat(array[2]).isEqualTo(1_000)
+                                   ~~~~~~~~
+                0 errors, 1 warnings
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -105,14 +130,22 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """
-            src/clean/TestingTesting.kt:10: Warning: Index with assertk assertions [UseIndexAssertion]
-                    assertThat(list[2]).isEqualTo(1_000)
-                               ~~~~~~~
-            0 errors, 1 warnings
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """
+                test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Index with assertk assertions [UseIndexAssertion]
+                        assertThat(list[2]).isEqualTo(1_000)
+                                   ~~~~~~~
+                0 errors, 1 warnings
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -133,14 +166,22 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """
-            src/clean/TestingTesting.kt:10: Warning: Index with assertk assertions [UseIndexAssertion]
-                    assertThat(list[1][2]).isEqualTo(1_000)
-                               ~~~~~~~~~~
-            0 errors, 1 warnings
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """
+                test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Index with assertk assertions [UseIndexAssertion]
+                        assertThat(list[1][2]).isEqualTo(1_000)
+                                   ~~~~~~~~~~
+                0 errors, 1 warnings
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -163,14 +204,22 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """
-            src/clean/CrazyWrapper.kt:12: Warning: Index with assertk assertions [UseIndexAssertion]
-                    assertThat(weirdList[2]).isEqualTo(1_000)
-                               ~~~~~~~~~~~~
-            0 errors, 1 warnings
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """
+                test/kotlin/test/pkg/UnitTestKotlin.kt:12: Warning: Index with assertk assertions [UseIndexAssertion]
+                        assertThat(weirdList[2]).isEqualTo(1_000)
+                                   ~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -192,14 +241,22 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """
-            Fix for src/clean/TestingTesting.kt line 11: Replace with assertThat(array).index(2):
-            @@ -11 +11
-            -         assertThat(array[2]).isEqualTo(1_000)
-            +         assertThat(array).index(2).isEqualTo(1_000)
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """
+                Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 11: Replace with assertThat(array).index(2):
+                @@ -11 +11
+                -         assertThat(array[2]).isEqualTo(1_000)
+                +         assertThat(array).index(2).isEqualTo(1_000)
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -220,16 +277,24 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """
-            Fix for src/clean/TestingTesting.kt line 10: Replace with assertThat(list[1]).index(2):
-            @@ -4 +4
-            + import assertk.assertions.index
-            @@ -10 +11
-            -         assertThat(list[1][2]).isEqualTo(1_000)
-            +         assertThat(list[1]).index(2).isEqualTo(1_000)
-            """.trimIndent(),
-        )
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """
+                Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(list[1]).index(2):
+                @@ -4 +4
+                + import assertk.assertions.index
+                @@ -10 +11
+                -         assertThat(list[1][2]).isEqualTo(1_000)
+                +         assertThat(list[1]).index(2).isEqualTo(1_000)
+                """.trimIndent(),
+            )
     }
 
     @Test
@@ -250,6 +315,14 @@ class IndexDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs("")
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs("")
     }
 }

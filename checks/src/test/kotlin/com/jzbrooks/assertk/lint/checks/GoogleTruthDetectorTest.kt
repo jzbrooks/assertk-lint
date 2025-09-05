@@ -30,7 +30,14 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -80,12 +87,12 @@ class GoogleTruthDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin("test/kotlin/test/MyTest.kt", code),
                 java(GOOGLE_TRUTH_STUB),
                 java(ASSERTION_STUB),
             ).run()
             .expect(
-                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [GoogleTruthUse]
+                """test/kotlin/test/MyTest.kt:10: Warning: Use assertk assertions [GoogleTruthUse]
         assertThat(first).isEqualTo(second)
         ~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",

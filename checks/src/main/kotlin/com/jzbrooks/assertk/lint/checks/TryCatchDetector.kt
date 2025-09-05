@@ -9,6 +9,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UQualifiedReferenceExpression
@@ -23,11 +24,12 @@ class TryCatchDetector :
     SourceCodeScanner {
     override fun getApplicableUastTypes() = listOf(UTryExpression::class.java)
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
-            override fun visitTryExpression(node: UTryExpression) {
-                if (!node.isKotlin) return
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
 
+        return object : UElementHandler() {
+            override fun visitTryExpression(node: UTryExpression) {
                 // This errs on the conservative side since complicated try/catch
                 // blocks may have some reason for existing other than the
                 // relevant assertion. Simple try/catch who's only purpose is
@@ -80,6 +82,7 @@ class TryCatchDetector :
                 }
             }
         }
+    }
 
     companion object {
         @JvmField

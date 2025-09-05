@@ -12,6 +12,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
 import com.intellij.psi.PsiArrayType
 import com.intellij.psi.util.InheritanceUtil
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UArrayAccessExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
@@ -26,11 +27,12 @@ class IndexDetector :
             UCallExpression::class.java,
         )
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
-            override fun visitCallExpression(node: UCallExpression) {
-                if (!node.isKotlin) return
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
 
+        return object : UElementHandler() {
+            override fun visitCallExpression(node: UCallExpression) {
                 val method = node.resolve() ?: return
 
                 val evaluator = context.evaluator
@@ -96,6 +98,7 @@ class IndexDetector :
                 }
             }
         }
+    }
 
     private data class IndexExpr(
         val collectionExpression: UExpression,

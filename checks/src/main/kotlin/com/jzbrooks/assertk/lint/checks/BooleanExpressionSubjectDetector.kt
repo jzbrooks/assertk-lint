@@ -10,6 +10,7 @@ import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
@@ -28,11 +29,12 @@ class BooleanExpressionSubjectDetector :
             UCallExpression::class.java,
         )
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
-            override fun visitCallExpression(node: UCallExpression) {
-                if (!node.isKotlin) return
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
 
+        return object : UElementHandler() {
+            override fun visitCallExpression(node: UCallExpression) {
                 val method = node.resolve() ?: return
 
                 if (method.isAssertThat) {
@@ -122,6 +124,7 @@ class BooleanExpressionSubjectDetector :
                                             .imports("assertk.assertions.isNull")
                                             .reformat(true)
                                             .build()
+
                                     "isFalse" ->
                                         fix()
                                             .replace()
@@ -135,6 +138,7 @@ class BooleanExpressionSubjectDetector :
                                             .imports("assertk.assertions.isNotNull")
                                             .reformat(true)
                                             .build()
+
                                     else -> null
                                 }
                             }
@@ -156,6 +160,7 @@ class BooleanExpressionSubjectDetector :
                                             .imports("assertk.assertions.isNotNull")
                                             .reformat(true)
                                             .build()
+
                                     "isFalse" ->
                                         fix()
                                             .replace()
@@ -169,6 +174,7 @@ class BooleanExpressionSubjectDetector :
                                             .imports("assertk.assertions.isNull")
                                             .reformat(true)
                                             .build()
+
                                     else -> null
                                 }
                             }
@@ -234,6 +240,7 @@ class BooleanExpressionSubjectDetector :
                                             ).imports("assertk.assertions.isEqualTo")
                                             .reformat(true)
                                             .build()
+
                                     "isFalse" ->
                                         fix()
                                             .replace()
@@ -248,6 +255,7 @@ class BooleanExpressionSubjectDetector :
                                             ).imports("assertk.assertions.isNotEqualTo")
                                             .reformat(true)
                                             .build()
+
                                     else -> null
                                 }
                             }
@@ -270,6 +278,7 @@ class BooleanExpressionSubjectDetector :
                                             ).imports("assertk.assertions.isNotEqualTo")
                                             .reformat(true)
                                             .build()
+
                                     "isFalse" ->
                                         fix()
                                             .replace()
@@ -284,6 +293,7 @@ class BooleanExpressionSubjectDetector :
                                             ).imports("assertk.assertions.isEqualTo")
                                             .reformat(true)
                                             .build()
+
                                     else -> null
                                 }
                             }
@@ -301,6 +311,7 @@ class BooleanExpressionSubjectDetector :
                 }
             }
         }
+    }
 
     companion object {
         @JvmField

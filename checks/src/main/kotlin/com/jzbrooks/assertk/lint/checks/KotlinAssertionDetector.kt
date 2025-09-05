@@ -9,6 +9,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.TextFormat
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import java.util.EnumSet
@@ -21,11 +22,12 @@ class KotlinAssertionDetector :
             UCallExpression::class.java,
         )
 
-    override fun createUastHandler(context: JavaContext) =
-        object : UElementHandler() {
-            override fun visitCallExpression(node: UCallExpression) {
-                if (!node.isKotlin) return
+    override fun createUastHandler(context: JavaContext): UElementHandler? {
+        if (!context.isTestSource) return null
+        if (context.uastFile?.lang != KotlinLanguage.INSTANCE) return null
 
+        return object : UElementHandler() {
+            override fun visitCallExpression(node: UCallExpression) {
                 val method = node.resolve() ?: return
                 val containingClass = method.containingClass?.qualifiedName ?: return
                 if (method.name == "assert" &&
@@ -54,14 +56,17 @@ class KotlinAssertionDetector :
                                 ),
                             ).imports("assertk.assertThat", "assertk.assertions.isTrue")
                             .with(
-                                "assertThat(${node.getArgumentForParameter(
-                                    0,
-                                )!!.sourcePsi!!.text}).isTrue()",
+                                "assertThat(${
+                                    node.getArgumentForParameter(
+                                        0,
+                                    )!!.sourcePsi!!.text
+                                }).isTrue()",
                             ).build(),
                     )
                 }
             }
         }
+    }
 
     companion object {
         @JvmField

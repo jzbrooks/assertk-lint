@@ -30,7 +30,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code)).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -79,11 +86,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expect(
-                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -110,11 +120,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isEqualTo(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
@@ -144,11 +157,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotEqualTo
@@ -178,11 +194,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) /* "The files are in the computer" */:
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isEqualTo(first) /* "The files are in the computer" */:
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
@@ -211,11 +230,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isTrue():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(condition).isTrue():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isTrue
@@ -244,11 +266,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isTrue() /* "Should be true" */:
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(condition).isTrue() /* "Should be true" */:
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isTrue
@@ -277,11 +302,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(condition).isFalse():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(condition).isFalse():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isFalse
@@ -309,11 +337,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 8: Replace with assertThat(value).isNull():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace with assertThat(value).isNull():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNull
@@ -341,11 +372,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 8: Replace with assertThat(value).isNotNull():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace with assertThat(value).isNotNull():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotNull
@@ -375,11 +409,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isSameAs(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isSameAs(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isSameAs
@@ -409,11 +446,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isNotSameAs(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotSameAs
@@ -442,11 +482,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(actual).containsOnly(*expected):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(actual).containsOnly(*expected):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.containsOnly
@@ -473,11 +516,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("This test should fail"):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 7: Replace with assertk.fail("This test should fail"):
 @@ -7 +7
 -         fail("This test should fail")
 +         assertk.fail("This test should fail")""",
@@ -501,11 +547,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_4_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 7: Replace with assertk.fail():
 @@ -7 +7
 -         fail()
 +         assertk.fail()""",
@@ -532,11 +581,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 java(JUNIT_5_ASSERT_STUB),
             ).run()
             .expect(
-                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -563,11 +615,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expect(
-                """src/error/TestingTesting.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:10: Warning: Use assertk assertions [TestFrameworkAssertionUse]
         assertEquals(first, second)
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 0 errors, 1 warnings""",
@@ -594,11 +649,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isEqualTo(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
@@ -628,11 +686,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first) /* "They should be equal" */:
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isEqualTo(first) /* "They should be equal" */:
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
@@ -662,11 +723,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isEqualTo(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isEqualTo(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isEqualTo
@@ -696,11 +760,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isNotEqualTo(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotEqualTo
@@ -730,11 +797,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isSameAs(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isSameAs(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isSameAs
@@ -764,11 +834,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(second).isNotSameAs(first):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(second).isNotSameAs(first):
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotSameAs
@@ -797,11 +870,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNull():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(first).isNull():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNull
@@ -830,11 +906,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotNull():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(first).isNotNull():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotNull
@@ -864,11 +943,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isTrue():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(canRead).isTrue():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isTrue
@@ -898,11 +980,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 10: Replace with assertThat(canRead).isFalse():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 10: Replace with assertThat(canRead).isFalse():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isFalse
@@ -931,11 +1016,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isInstanceOf<java.io.File>():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(first).isInstanceOf<java.io.File>():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isInstanceOf
@@ -964,7 +1052,10 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs("")
@@ -989,11 +1080,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 9: Replace with assertThat(first).isNotInstanceOf<java.io.File>():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(first).isNotInstanceOf<java.io.File>():
 @@ -3 +3
 + import assertk.assertThat
 + import assertk.assertions.isNotInstanceOf
@@ -1020,11 +1114,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail():
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 7: Replace with assertk.fail():
 @@ -7 +7
 -         fail()
 +         assertk.fail()""",
@@ -1048,11 +1145,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail("Uh oh!"):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 7: Replace with assertk.fail("Uh oh!"):
 @@ -7 +7
 -         fail("Uh oh!")
 +         assertk.fail("Uh oh!")""",
@@ -1076,11 +1176,14 @@ class TestFrameworkAssertionDetectorTest : LintDetectorTest() {
 
         lint()
             .files(
-                kotlin(code),
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
                 kotlin(KOTLIN_TEST_ASSERT_STUB),
             ).run()
             .expectFixDiffs(
-                """Fix for src/error/TestingTesting.kt line 7: Replace with assertk.fail(cause = IllegalStateException()):
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 7: Replace with assertk.fail(cause = IllegalStateException()):
 @@ -7 +7
 -         fail(cause = IllegalStateException())
 +         assertk.fail(cause = IllegalStateException())""",

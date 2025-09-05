@@ -26,7 +26,15 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -43,12 +51,20 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/clean/Scenario.kt:7: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:7: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
     LambdaAssertionScenario(assertion = { assertThat("") })
                                           ~~~~~~~~~~~~~~
 1 errors, 0 warnings""",
-        )
+            )
     }
 
     @Test
@@ -71,7 +87,15 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -96,7 +120,15 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectClean()
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
     }
 
     @Test
@@ -118,12 +150,20 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expect(
-            """src/error/TestingTesting.kt:11: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:11: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
         assertThat(first)
         ~~~~~~~~~~~~~~~~~
 1 errors, 0 warnings""",
-        )
+            )
     }
 
     @Test
@@ -143,14 +183,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNull():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNull():
 @@ -4 +4
 + import assertk.assertions.isNull
 @@ -9 +10
 -         assertThat(name == null)
 +         assertThat(name).isNull()""",
-        )
+            )
     }
 
     @Test
@@ -170,14 +218,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotNull():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNotNull():
 @@ -4 +4
 + import assertk.assertions.isNotNull
 @@ -9 +10
 -         assertThat(name != null)
 +         assertThat(name).isNotNull()""",
-        )
+            )
     }
 
     @Test
@@ -197,14 +253,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNull():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNull():
 @@ -4 +4
 + import assertk.assertions.isNull
 @@ -9 +10
 -         assertThat(null == name)
 +         assertThat(name).isNull()""",
-        )
+            )
     }
 
     @Test
@@ -224,14 +288,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotNull():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNotNull():
 @@ -4 +4
 + import assertk.assertions.isNotNull
 @@ -9 +10
 -         assertThat(null != name)
 +         assertThat(name).isNotNull()""",
-        )
+            )
     }
 
     @Test
@@ -251,14 +323,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotEqualTo("Test"):
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNotEqualTo("Test"):
 @@ -4 +4
 + import assertk.assertions.isNotEqualTo
 @@ -9 +10
 -         assertThat("Test" != name)
 +         assertThat(name).isNotEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -278,14 +358,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isNotEqualTo("Test"):
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isNotEqualTo("Test"):
 @@ -4 +4
 + import assertk.assertions.isNotEqualTo
 @@ -9 +10
 -         assertThat(name != "Test")
 +         assertThat(name).isNotEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -305,14 +393,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isEqualTo("Test"):
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isEqualTo("Test"):
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat("Test" == name)
 +         assertThat(name).isEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -332,14 +428,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 9: Replace with assertThat(name).isEqualTo("Test"):
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with assertThat(name).isEqualTo("Test"):
 @@ -4 +4
 + import assertk.assertions.isEqualTo
 @@ -9 +10
 -         assertThat(name == "Test")
 +         assertThat(name).isEqualTo("Test")""",
-        )
+            )
     }
 
     @Test
@@ -358,14 +462,22 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 8: Replace with assertThat(name).isInstanceOf<String>():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace with assertThat(name).isInstanceOf<String>():
 @@ -4 +4
 + import assertk.assertions.isInstanceOf
 @@ -8 +9
 -         assertThat(name is String)
 +         assertThat(name).isInstanceOf<String>()""",
-        )
+            )
     }
 
     @Test
@@ -384,13 +496,21 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
             }
             """.trimIndent()
 
-        lint().files(kotlin(code), *ASSERTK_STUBS).run().expectFixDiffs(
-            """Fix for src/clean/Testing.kt line 8: Replace with assertThat(name).isNotInstanceOf<String>():
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace with assertThat(name).isNotInstanceOf<String>():
 @@ -4 +4
 + import assertk.assertions.isNotInstanceOf
 @@ -8 +9
 -         assertThat(name !is String)
 +         assertThat(name).isNotInstanceOf<String>()""",
-        )
+            )
     }
 }

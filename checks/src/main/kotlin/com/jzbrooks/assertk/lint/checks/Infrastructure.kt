@@ -1,7 +1,7 @@
 package com.jzbrooks.assertk.lint.checks
 
-import com.android.tools.lint.detector.api.isKotlin
 import com.intellij.psi.PsiMethod
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
@@ -14,10 +14,7 @@ import org.jetbrains.uast.isNullLiteral
 import org.jetbrains.uast.skipParenthesizedExprDown
 
 internal val UExpression.isKotlin: Boolean
-    get() {
-        val sourcePsi = sourcePsi ?: return false
-        return isKotlin(sourcePsi.language)
-    }
+    get() = lang === KotlinLanguage.INSTANCE
 
 // todo: can this be done with UAST?
 internal val PsiMethod.isAssertThat: Boolean
