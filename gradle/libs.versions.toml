@@ -5,7 +5,7 @@ changelog = "2.4.0"
 junit = "4.13.2"
 kotlin = "2.2.21"
 mavenPublish = "0.34.0"
-spotless = "7.2.1"
+spotless = "8.0.0"
 
 [libraries]
 androidLintApi = { group = "com.android.tools.lint", name = "lint-api", version.ref = "androidLint" }
