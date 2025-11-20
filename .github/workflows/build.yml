@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Fetch Sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up a JDK
         uses: actions/setup-java@v5
@@ -85,7 +85,7 @@ jobs:
     steps:
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Remove old release drafts by using the curl request for the available releases with draft flag
       - name: Remove Old Release Drafts
