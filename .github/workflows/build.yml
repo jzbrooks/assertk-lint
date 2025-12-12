@@ -53,13 +53,13 @@ jobs:
         run: ./gradlew check
 
       - name: Archive lint results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: checks lint results
           path: checks/build/reports/lint-results.html
 
       - name: Archive test results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: checks test results
           path: checks/build/reports/tests/test
@@ -68,7 +68,7 @@ jobs:
         run: ./gradlew assemble
 
       - name: Archive checks.jar
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: checks.aar
           path: checks/build/libs/checks.jar
