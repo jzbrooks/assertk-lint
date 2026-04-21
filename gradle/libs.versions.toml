@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.2"
 androidLint = "31.13.0" # agp + 23.0.0
 changelog = "2.5.0"
 junit = "4.13.2"
