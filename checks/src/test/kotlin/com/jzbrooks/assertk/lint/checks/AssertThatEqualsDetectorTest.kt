@@ -33,7 +33,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expect(
-                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace assertThat(1).equals(1) with assertThat(...).isEqualTo(...). [AssertThatEqualsUsage]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace Any.equals with Assert.isEqualTo [AssertThatEqualsUsage]
     assertThat(1).equals(1)
     ~~~~~~~~~~~~~~~~~~~~~~~
 1 error""",
@@ -112,7 +112,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expect(
-                """test/kotlin/test/pkg/UnitTestKotlin.kt:4: Error: Replace assertk.assertThat(1).equals(1) with assertThat(...).isEqualTo(...). [AssertThatEqualsUsage]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:4: Error: Replace Any.equals with Assert.isEqualTo [AssertThatEqualsUsage]
     assertk.assertThat(1).equals(1)
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1 error""",
@@ -144,7 +144,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expect(
-                """test/kotlin/test/pkg/UnitTestKotlin.kt:9: Error: Replace tmp.equals(1) with assertThat(...).isEqualTo(...). [AssertThatEqualsUsage]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:9: Error: Replace Any.equals with Assert.isEqualTo [AssertThatEqualsUsage]
     tmp.equals(1)
     ~~~~~~~~~~~~~
 1 error""",
@@ -173,7 +173,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expect(
-                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace item.equals(1) with assertThat(...).isEqualTo(...). [AssertThatEqualsUsage]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace Any.equals with Assert.isEqualTo [AssertThatEqualsUsage]
     item.equals(1)
     ~~~~~~~~~~~~~~
 1 error""",
@@ -203,7 +203,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expect(
-                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace equals(1) with assertThat(...).isEqualTo(...). [AssertThatEqualsUsage]
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:6: Error: Replace Any.equals with Assert.isEqualTo [AssertThatEqualsUsage]
         equals(1)
         ~~~~~~~~~
 1 error""",
@@ -232,7 +232,7 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
                 *ASSERTK_STUBS,
             ).run()
             .expectFixDiffs(
-                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 6: Replace equals with isEqualTo:
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 6: Replace with isEqualTo(1):
 @@ -3,0 +4 @@
 +import assertk.assertions.isEqualTo
 @@ -6 +7 @@
