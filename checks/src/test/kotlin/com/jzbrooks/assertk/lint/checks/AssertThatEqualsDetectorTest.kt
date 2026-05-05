@@ -240,4 +240,33 @@ class AssertThatEqualsDetectorTest : LintDetectorTest() {
 +    assertThat(1).isEqualTo(1)""",
             )
     }
+
+    @Test
+    fun `does not report extension function named equals returning unit`() {
+        val code =
+            """
+            package clean
+
+            import assertk.Assert
+            import assertk.assertThat
+
+            fun Assert<Int>.equals(somethingElse: Int) {
+
+            }
+
+            fun test() {
+                assertThat(1).equals(somethingElse = 1)
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expectClean()
+    }
 }

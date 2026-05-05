@@ -10,9 +10,8 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiTypes
 import org.jetbrains.uast.UCallExpression
-import org.jetbrains.uast.UElement
-import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
 import java.util.EnumSet
 
@@ -28,6 +27,7 @@ class AssertThatEqualsDetector :
     ) {
         if (!context.isTestSource) return
         if (node.valueArgumentCount != 1) return
+        if (method.returnType != PsiTypes.booleanType()) return
         if (!isAssertkAssertReceiver(context, node)) return
 
         val argText =
@@ -57,30 +57,8 @@ class AssertThatEqualsDetector :
         context: JavaContext,
         node: UCallExpression,
     ): Boolean {
-        val receiverExpr = node.receiver?.skipParenthesizedExprDown()
-
-        if (receiverExpr != null) {
-            val receiverType = receiverExpr.getExpressionType() ?: return false
-            val receiverClass = context.evaluator.getTypeClass(receiverType) ?: return false
-            return context.evaluator.extendsClass(receiverClass, ASSERTK_ASSERT_FQCN, false)
-        }
-
-        var cursor: UElement? = node.uastParent
-        while (cursor != null) {
-            if (cursor is ULambdaExpression) {
-                val enclosingCall = cursor.uastParent as? UCallExpression
-                val callReceiver = enclosingCall?.receiver?.skipParenthesizedExprDown()
-                if (callReceiver != null) {
-                    val receiverType = callReceiver.getExpressionType() ?: break
-                    val receiverClass = context.evaluator.getTypeClass(receiverType) ?: break
-                    return context.evaluator.extendsClass(receiverClass, ASSERTK_ASSERT_FQCN, false)
-                }
-                break
-            }
-            cursor = cursor.uastParent
-        }
-
-        return false
+        val clazz = context.evaluator.getTypeClass(node.receiverType)
+        return context.evaluator.inheritsFrom(clazz, ASSERTK_ASSERT_FQCN)
     }
 
     private fun buildFix(
