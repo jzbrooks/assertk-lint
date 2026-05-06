@@ -8,7 +8,9 @@ val assertkStub =
     package assertk
 
     class Assert<T> {
+        override fun equals(other: Any?): Boolean {
 
+        }
     }
 
     fun <T> assertThat(subject: T?): Assert<T> {
