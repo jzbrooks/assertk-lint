@@ -15,6 +15,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.kotlin.psi.KtIsExpression
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
@@ -44,6 +45,16 @@ class UnusedAssertionDetector :
                 object : DataFlowAnalyzer(setOf(node)) {
                     override fun receiver(call: UCallExpression) {
                         usedAsReceiver = true
+                    }
+
+                    // Scope functions (apply/also/run/with/let) dispatch through argument(), not receiver().
+                    override fun argument(
+                        call: UCallExpression,
+                        reference: UElement,
+                    ) {
+                        if (reference === node || reference.sourcePsi === node.sourcePsi) {
+                            usedAsReceiver = true
+                        }
                     }
                 }
 
