@@ -167,6 +167,43 @@ class UnusedAssertionDetectorTest : LintDetectorTest() {
     }
 
     @Test
+    fun `unused assertion subject with scope is detected`() {
+        val code =
+            """
+            package clean
+
+            import java.io.File
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class TestingTesting {
+                fun testingTest() {
+                    val first = File()
+                    val second = File()
+
+                    assertThat(first).apply {
+                    }
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(
+                kotlin(
+                    "test/kotlin/test/pkg/UnitTestKotlin.kt",
+                    code,
+                ),
+                *ASSERTK_STUBS,
+            ).run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:12: Error: Assertion subjects without assertions never fail a test [UnusedAssertkAssertion]
+        assertThat(first).apply {
+        ~~~~~~~~~~~~~~~~~
+1 errors, 0 warnings""",
+            )
+    }
+
+    @Test
     fun `quick fix applied for null check with rhs literal`() {
         val code =
             """

@@ -1,6 +1,7 @@
 package com.jzbrooks.assertk.lint.checks
 
-import com.android.tools.lint.checks.DataFlowAnalyzer
+import com.android.tools.lint.checks.TargetMethodDataFlowAnalyzer
+import com.android.tools.lint.client.api.JavaEvaluator
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -11,17 +12,20 @@ import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.TextFormat
+import com.android.tools.lint.detector.api.getReceiverOrContainingClass
 import com.intellij.psi.PsiMethod
 import org.jetbrains.kotlin.psi.KtIsExpression
 import org.jetbrains.uast.UBinaryExpression
 import org.jetbrains.uast.UCallExpression
-import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULambdaExpression
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.getParentOfType
 import org.jetbrains.uast.skipParenthesizedExprDown
+import org.jetbrains.uast.skipParenthesizedExprUp
+import org.jetbrains.uast.visitor.AbstractUastVisitor
 import java.util.EnumSet
 
 class UnusedAssertionDetector :
@@ -40,37 +44,48 @@ class UnusedAssertionDetector :
         val evaluator = context.evaluator
 
         if (evaluator.extendsClass(containingClass, "assertk.AssertKt", false)) {
-            var usedAsReceiver = false
-            val visitor =
-                object : DataFlowAnalyzer(setOf(node)) {
-                    override fun receiver(call: UCallExpression) {
-                        usedAsReceiver = true
-                    }
+            // Workaround for K2: inside a scope-function lambda
+            // (assertThat(x).apply { ... }) the DataFlowAnalyzer fails to fire
+            // receiver() for some reason, so calls like isEqualTo(y) inside
+            // the lambda look unreachable to the analyzer. If the lambda body
+            // contains at least one call expression, treat the chain as used.
+            // An empty lambda still falls through to the analyzer, which correctly
+            // flags it as unused. It's possible that this implicit receiver issue
+            // is a problem with test stubs in this project.
+            val parent = skipParenthesizedExprUp(node.uastParent)
+            val scopeSelector =
+                (parent as? UQualifiedReferenceExpression)
+                    ?.takeIf {
+                        it.receiver.skipParenthesizedExprDown().sourcePsi === node.sourcePsi
+                    }?.selector as? UCallExpression
+            if (scopeSelector != null && scopeSelector.scopeLambdaContainsCall(evaluator)) {
+                return
+            }
 
-                    // Scope functions (apply/also/run/with/let) dispatch through argument(), not receiver().
-                    override fun argument(
-                        call: UCallExpression,
-                        reference: UElement,
-                    ) {
-                        if (reference === node || reference.sourcePsi === node.sourcePsi) {
-                            usedAsReceiver = true
-                        }
-                    }
+            val visitor =
+                object : TargetMethodDataFlowAnalyzer(setOf(node)) {
+                    override fun isTargetMethod(
+                        name: String,
+                        method: PsiMethod?,
+                    ): Boolean = method != null
                 }
 
             val uElement =
                 node.getParentOfType(true, UMethod::class.java, ULambdaExpression::class.java)
             uElement?.accept(visitor)
 
-            if (!usedAsReceiver) {
-                context.report(
-                    ISSUE,
-                    node,
+            if (!visitor.targetReached) {
+                val location =
                     context.getCallLocation(
                         call = node,
                         includeReceiver = true,
                         includeArguments = true,
-                    ),
+                    )
+
+                context.report(
+                    ISSUE,
+                    node,
+                    location,
                     ISSUE.getBriefDescription(TextFormat.TEXT),
                     buildFix(context, node),
                 )
@@ -279,7 +294,38 @@ class UnusedAssertionDetector :
             .build()
     }
 
+    private fun UCallExpression.isStandardScopeFunction(): Boolean {
+        if (methodName !in SCOPE_FUNCTION_NAMES) return false
+        val containingClass = resolve()?.containingClass?.qualifiedName
+        return containingClass == "kotlin.StandardKt" ||
+            containingClass == "kotlin.StandardKt__StandardKt"
+    }
+
+    private fun UCallExpression.scopeLambdaContainsCall(evaluator: JavaEvaluator): Boolean {
+        if (!isStandardScopeFunction()) return false
+
+        val lambda =
+            valueArguments.lastOrNull()?.skipParenthesizedExprDown() as? ULambdaExpression
+                ?: return false
+        var found = false
+        lambda.body.accept(
+            object : AbstractUastVisitor() {
+                override fun visitCallExpression(node: UCallExpression): Boolean {
+                    val type =
+                        evaluator.getClassType(
+                            node.resolve()?.getReceiverOrContainingClass(),
+                        )
+                    found = evaluator.typeMatches(type, "assertk.Assert")
+                    return true
+                }
+            },
+        )
+        return found
+    }
+
     companion object {
+        private val SCOPE_FUNCTION_NAMES = setOf("apply", "also", "run", "with", "let")
+
         @JvmField
         val ISSUE: Issue =
             Issue.create(

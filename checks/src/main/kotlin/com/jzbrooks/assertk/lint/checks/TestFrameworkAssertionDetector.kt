@@ -36,6 +36,7 @@ class TestFrameworkAssertionDetector :
             private val junit4 = "org.junit.Assert"
             private val junit5 = "org.junit.jupiter.api.Assertions"
             private val kotlinTest = "kotlin.test.AssertionsKt__AssertionsKt"
+            private val kotlinTestFacade = "kotlin.test.AssertionsKt"
 
             override fun visitCallExpression(node: UCallExpression) {
                 val psiMethod = node.resolve()
@@ -60,7 +61,8 @@ class TestFrameworkAssertionDetector :
                         )
                     }
 
-                    context.evaluator.isMemberInClass(psiMethod, kotlinTest) -> {
+                    context.evaluator.isMemberInClass(psiMethod, kotlinTest) ||
+                        context.evaluator.isMemberInClass(psiMethod, kotlinTestFacade) -> {
                         context.report(
                             ISSUE,
                             node,
