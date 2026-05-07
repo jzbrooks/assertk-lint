@@ -4,7 +4,6 @@ import com.android.tools.lint.checks.infrastructure.LintDetectorTest.kotlin
 
 val assertkStub =
     """
-    @file:JvmName("AssertKt")
     package assertk
 
     class Assert<T> {
@@ -27,29 +26,29 @@ val assertkAssertionsStub =
     @file:JvmName("AnyKt")
     package assertk.assertions
 
-    fun <T, U> Assert<T>.prop(property: () -> U): Assert<U> {
+    fun <T, U> assertk.Assert<T>.prop(property: () -> U): Assert<U> {
 
     }
 
-    fun <T> Assert<T>.isEqualTo(expected: T) {
+    fun <T> assertk.Assert<T>.isEqualTo(expected: T) {
 
     }
 
-    fun <T> Assert<T?>.isNotNull(): Assert<T> {
+    fun <T> assertk.Assert<T?>.isNotNull(): Assert<T> {
 
     }
 
-    fun <T> Assert<T>.isTrue() {
+    fun <T> assertk.Assert<T>.isTrue() {
 
     }
 
-    fun <T> Assert<T>.isFalse() {
+    fun <T> assertk.Assert<T>.isFalse() {
 
     }
 
-    inline fun <reified T : Any> Assert<Any?>.isInstanceOf(): Assert<T> = isInstanceOf(T::class)
+    inline fun <reified T : Any> assertk.Assert<Any?>.isInstanceOf(): Assert<T> = isInstanceOf(T::class)
 
-    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: KClass<T>): Assert<T> {
+    fun <T : Any> assertk.Assert<Any?>.isInstanceOf(clazz: KClass<T>): Assert<T> {
     }
     """.trimIndent()
 
@@ -58,19 +57,19 @@ val assertkIterableStub =
     @file:JvmName("IterableKt")
     package assertk.assertions
 
-    fun <T> Assert<Iterable<T>>.doesNotContain(value: T) {
+    fun <T> assertk.Assert<Iterable<T>>.doesNotContain(value: T) {
 
     }
 
-    fun <T> Assert<Iterable<T>>.contains(value: T) {
+    fun <T> assertk.Assert<Iterable<T>>.contains(value: T) {
 
     }
 
-    fun <T, U> Assert<Map<T, U>>.key(key: T): Assert<U> {
+    fun <T, U> assertk.Assert<Map<T, U>>.key(key: T): Assert<U> {
 
     }
 
-    fun <T> Assert<Array<T>>.index(index: Int): Assert<T> {
+    fun <T> assertk.Assert<Array<T>>.index(index: Int): Assert<T> {
 
     }
     """.trimIndent()
@@ -90,7 +89,7 @@ val assertkComparableStub =
     @file:JvmName("ComparableKt")
     package assertk.assertions
 
-    fun <A, B : Comparable<A>> Assert<B>.isGreaterThan(other: A) {
+    fun <A, B : Comparable<A>> assertk.Assert<B>.isGreaterThan(other: A) {
 
     }
     """.trimIndent()
@@ -100,7 +99,7 @@ val assertkAnyJvmStub =
     @file:JvmName("AnyJVMKt")
     package assertk.assertions
 
-    fun <T : Any> Assert<Any?>.isInstanceOf(clazz: Class<T>): Assert<T> {
+    fun <T : Any> assertk.Assert<Any?>.isInstanceOf(clazz: Class<T>): Assert<T> {
     }
     """.trimIndent()
 
