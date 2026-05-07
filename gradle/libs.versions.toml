@@ -14,6 +14,7 @@ androidLintCli = { group = "com.android.tools.lint", name = "lint", version.ref 
 androidLintTests = { group = "com.android.tools.lint", name = "lint-tests", version.ref = "androidLint" }
 junit = { group = "junit", name = "junit", version.ref  = "junit" }
 kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+kotlinTest = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 
 [bundles]
 lint-api = [
@@ -24,7 +25,8 @@ lint-api = [
 lint-tests = [
     "junit",
     "androidLintCli",
-    "androidLintTests"
+    "androidLintTests",
+    "kotlinTest",
 ]
 
 [plugins]
