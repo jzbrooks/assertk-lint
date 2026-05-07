@@ -1,6 +1,22 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "config:recommended",
-  ]
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    automergeType: "pr",
+    automergeStrategy: "rebase",
+    packageRules: [
+        {
+            matchUpdateTypes: ["minor", "patch"],
+            automerge: true,
+        },
+        {
+            groupName: "kotlin",
+            matchPackagePrefixes: ["org.jetbrains.kotlin"],
+        },
+        {
+            groupName: "Android Tools",
+            matchPackagePrefixes: [
+                "com.android.lint",
+                "com.android.tools.lint",
+            ],
+        },
+    ],
 }
