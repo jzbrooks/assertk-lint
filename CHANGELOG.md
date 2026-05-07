@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+* _AssertThatEqualsDetector_ detects `Any.equals` calls on assertion subjects which will never fail tests
 
 ### Changed
 
