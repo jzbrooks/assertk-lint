@@ -1,0 +1,106 @@
+site_name: assertk-lint
+site_description: A set of Android Lint rules to encourage proper use of assertk.
+site_url: https://jzbrooks.github.io/assertk-lint/
+repo_url: https://github.com/jzbrooks/assertk-lint
+repo_name: jzbrooks/assertk-lint
+edit_uri: edit/master/docs/
+
+docs_dir: docs
+exclude_docs: |
+  requirements.txt
+
+theme:
+  name: material
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - scheme: slate
+      primary: black
+      accent: white
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - scheme: default
+      primary: black
+      accent: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - content.action.view
+    - search.suggest
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jzbrooks/assertk-lint
+    - icon: fontawesome/brands/java
+      link: https://central.sonatype.com/artifact/com.jzbrooks/assertk-lint
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets:
+      base_path:
+        - .
+        - docs
+      check_paths: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Configuration: configuration.md
+  - Checks:
+      - Overview: checks/index.md
+      - UnusedAssertkAssertion: checks/unused-assertion.md
+      - AssertThatEqualsUsage: checks/assert-that-equals.md
+      - TestFrameworkAssertionUse: checks/test-framework.md
+      - KotlinAssertionUse: checks/kotlin-assertion.md
+      - NullComparisonAssertion: checks/null-comparison.md
+      - EqualityComparisonAssertion: checks/equality-comparison.md
+      - CollectionSizeAssertion: checks/collection-size.md
+      - UseIndexAssertion: checks/use-index.md
+      - MapValueAssertion: checks/map-value.md
+      - KeySetPresentAssertion: checks/key-set-present.md
+      - KeySetAbsentAssertion: checks/key-set-absent.md
+      - TryCatchAssertion: checks/try-catch.md
+      - AssertJUse: checks/assertj.md
+      - GoogleTruthUse: checks/google-truth.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
