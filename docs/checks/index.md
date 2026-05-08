@@ -1,6 +1,6 @@
 # Checks
 
-assertk-lint ships **14 issues** across 11 detectors. All detectors run only
+assertk-lint ships **15 issues** across 12 detectors. All detectors run only
 against Kotlin test sources.
 
 ## Errors
@@ -23,6 +23,7 @@ where the surrounding test will silently pass even though it shouldn't.
 | [`EqualityComparisonAssertion`](equality-comparison.md) | `assertThat(a == b)` / `assertThat(a != b)` | Yes |
 | [`CollectionSizeAssertion`](collection-size.md) | `assertThat(list.size).isEqualTo(n)` &mdash; use `hasSize(n)` | Yes |
 | [`UseIndexAssertion`](use-index.md) | `assertThat(list[i])` &mdash; use `assertThat(list).index(i)` | Yes |
+| [`UseSingleAssertion`](use-single.md) | `all { hasSize(1); first()... }` &mdash; use `single()` | Yes |
 | [`MapValueAssertion`](map-value.md) | `assertThat(map[k])` &mdash; use `assertThat(map).key(k)` | Yes |
 | [`KeySetPresentAssertion`](key-set-present.md) | `assertThat(map.keys).contains(k)` &mdash; use `key(k)` | Yes |
 | [`KeySetAbsentAssertion`](key-set-absent.md) | `assertThat(map.keys).doesNotContain(k)` &mdash; use `doesNotContainKey(k)` | Yes |
