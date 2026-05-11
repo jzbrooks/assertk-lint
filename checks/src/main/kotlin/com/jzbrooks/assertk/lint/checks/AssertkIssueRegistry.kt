@@ -18,6 +18,7 @@ class AssertkIssueRegistry : IssueRegistry() {
             MapAssertionDetector.DIRECT_READ_ISSUE,
             MapAssertionDetector.KEYS_SET_ABSENT_ISSUE,
             MapAssertionDetector.KEYS_SET_PRESENT_ISSUE,
+            SingleAssertionDetector.ISSUE,
             TestFrameworkAssertionDetector.ISSUE,
             TryCatchDetector.ISSUE,
             UnusedAssertionDetector.ISSUE,

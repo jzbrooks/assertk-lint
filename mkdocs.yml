@@ -96,6 +96,7 @@ nav:
       - EqualityComparisonAssertion: checks/equality-comparison.md
       - CollectionSizeAssertion: checks/collection-size.md
       - UseIndexAssertion: checks/use-index.md
+      - UseSingleAssertion: checks/use-single.md
       - MapValueAssertion: checks/map-value.md
       - KeySetPresentAssertion: checks/key-set-present.md
       - KeySetAbsentAssertion: checks/key-set-absent.md

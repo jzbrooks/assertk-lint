@@ -4,6 +4,7 @@
 
 ### Added
 * _AssertThatEqualsDetector_ detects `Any.equals` calls on assertion subjects which will never fail tests
+* _SingleAssertionDetector_ encourages `single()` over combining `hasSize(1)` with `index(0)` or `first()` inside `all { }`
 
 ### Changed
 

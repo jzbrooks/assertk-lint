@@ -16,6 +16,10 @@ val assertkStub =
 
     }
 
+    fun <T> Assert<T>.all(body: Assert<T>.() -> Unit) {
+
+    }
+
     fun fail() {
         throw java.lang.AssertionError("fail!")
     }
@@ -70,6 +74,18 @@ val assertkIterableStub =
     }
 
     fun <T> assertk.Assert<Array<T>>.index(index: Int): Assert<T> {
+
+    }
+
+    fun <T> Assert<List<T>>.index(index: Int): Assert<T> {
+
+    }
+
+    fun <T> Assert<Iterable<T>>.first(): Assert<T> {
+
+    }
+
+    fun <T> Assert<Iterable<T>>.single(): Assert<T> {
 
     }
     """.trimIndent()
