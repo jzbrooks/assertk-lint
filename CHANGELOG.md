@@ -6,15 +6,8 @@
 * _AssertThatEqualsDetector_ detects `Any.equals` calls on assertion subjects which will never fail tests
 * _SingleAssertionDetector_ encourages `single()` over combining `hasSize(1)` with `index(0)` or `first()` inside `all { }`
 
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
-
-### Security
+- Maven central publication (from sonatype OSSRH)
 
 ## 1.5.1 - 2025-09-05
 
