@@ -6,13 +6,13 @@ val assertkStub =
     """
     package assertk
 
-    class Assert<T> {
+    class Assert<out T> {
         override fun equals(other: Any?): Boolean {
 
         }
     }
 
-    fun <T> assertThat(subject: T?): Assert<T> {
+    fun <T> assertThat(subject: T): Assert<T> {
 
     }
 

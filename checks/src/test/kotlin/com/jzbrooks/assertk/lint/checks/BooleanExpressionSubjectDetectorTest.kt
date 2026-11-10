@@ -12,6 +12,7 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
 
     override fun getIssues() =
         listOf(
+            BooleanExpressionSubjectDetector.BOOLEAN_EQUALITY_ISSUE,
             BooleanExpressionSubjectDetector.NULL_EXPR_ISSUE,
             BooleanExpressionSubjectDetector.EQUALITY_EXPR_ISSUE,
         )
@@ -593,5 +594,186 @@ class BooleanExpressionSubjectDetectorTest : LintDetectorTest() {
 -         assertThat(System.identityHashCode(name) == (0..10).random()).isTrue()
 +         assertThat(System.identityHashCode(name)).isEqualTo((0..10).random())""",
             )
+    }
+
+    @Test
+    fun `boolean isEqualTo true fixed to isTrue`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    val flag: Boolean = other.isEmpty()
+                    assertThat(flag).isEqualTo(true)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with isTrue():
+@@ -4 +4
++ import assertk.assertions.isTrue
+@@ -9 +10
+-         assertThat(flag).isEqualTo(true)
++         assertThat(flag).isTrue()""",
+            )
+    }
+
+    @Test
+    fun `boolean isEqualTo false fixed to isFalse`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    val flag: Boolean = other.isEmpty()
+                    assertThat(flag).isEqualTo(false)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with isFalse():
+@@ -4 +4
++ import assertk.assertions.isFalse
+@@ -9 +10
+-         assertThat(flag).isEqualTo(false)
++         assertThat(flag).isFalse()""",
+            )
+    }
+
+    @Test
+    fun `nullable boolean isEqualTo false fixed to isNotNull isFalse`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    val flag: Boolean? = other.isEmpty()
+                    assertThat(flag).isEqualTo(false)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace with isNotNull().isFalse():
+@@ -4 +4
++ import assertk.assertions.isFalse
++ import assertk.assertions.isNotNull
+@@ -9 +11
+-         assertThat(flag).isEqualTo(false)
++         assertThat(flag).isNotNull().isFalse()""",
+            )
+    }
+
+    @Test
+    fun `null comparison with isEqualTo false fixed in one step`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    val name: String? = other.ifEmpty { null }
+                    assertThat(name == null).isEqualTo(false)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:9: Warning: Use built-in nullability assertions [NullComparisonAssertion]
+        assertThat(name == null).isEqualTo(false)
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+            ).expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 9: Replace null comparison with null assertion:
+@@ -4 +4
++ import assertk.assertions.isNotNull
+@@ -9 +10
+-         assertThat(name == null).isEqualTo(false)
++         assertThat(name).isNotNull()""",
+            )
+    }
+
+    @Test
+    fun `equality comparison with isEqualTo true fixed in one step`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    assertThat(other == "a").isEqualTo(true)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expect(
+                """test/kotlin/test/pkg/UnitTestKotlin.kt:8: Warning: Use equality assertions [EqualityComparisonAssertion]
+        assertThat(other == "a").isEqualTo(true)
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+0 errors, 1 warnings""",
+            ).expectFixDiffs(
+                """Fix for test/kotlin/test/pkg/UnitTestKotlin.kt line 8: Replace equality check with equality assertion:
+@@ -8 +8
+-         assertThat(other == "a").isEqualTo(true)
++         assertThat(other).isEqualTo("a")""",
+            )
+    }
+
+    @Test
+    fun `boolean isEqualTo variable is clean`() {
+        val code =
+            """
+            package clean
+
+            import assertk.assertThat
+            import assertk.assertions.isEqualTo
+
+            class Testing {
+                fun test(other: String) {
+                    val expected = true
+                    assertThat(other.isEmpty()).isEqualTo(expected)
+                }
+            }
+            """.trimIndent()
+
+        lint()
+            .files(kotlin("test/kotlin/test/pkg/UnitTestKotlin.kt", code), *ASSERTK_STUBS)
+            .run()
+            .expectClean()
     }
 }

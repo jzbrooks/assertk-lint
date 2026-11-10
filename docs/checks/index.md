@@ -1,6 +1,6 @@
 # Checks
 
-assertk-lint ships **15 issues** across 12 detectors. All detectors run only
+assertk-lint ships **16 issues** across 12 detectors. All detectors run only
 against Kotlin test sources.
 
 ## Errors
@@ -21,6 +21,7 @@ where the surrounding test will silently pass even though it shouldn't.
 | [`KotlinAssertionUse`](kotlin-assertion.md) | `kotlin.assert(...)` in tests | Yes |
 | [`NullComparisonAssertion`](null-comparison.md) | `assertThat(x == null)` / `assertThat(x != null)` | Yes |
 | [`EqualityComparisonAssertion`](equality-comparison.md) | `assertThat(a == b)` / `assertThat(a != b)` | Yes |
+| [`BooleanEqualityAssertion`](boolean-equality.md) | `assertThat(b).isEqualTo(true)` &mdash; use `isTrue()` | Yes |
 | [`CollectionSizeAssertion`](collection-size.md) | `assertThat(list.size).isEqualTo(n)` &mdash; use `hasSize(n)` | Yes |
 | [`UseIndexAssertion`](use-index.md) | `assertThat(list[i])` &mdash; use `assertThat(list).index(i)` | Yes |
 | [`UseSingleAssertion`](use-single.md) | `all { hasSize(1); first()... }` &mdash; use `single()` | Yes |
