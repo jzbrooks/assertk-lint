@@ -4,7 +4,11 @@
 
 ### Added
 
+- _BooleanEqualityAssertion_ requires `isTrue()`/`isFalse()` over `isEqualTo(true)`/`isEqualTo(false)`, chaining `isNotNull()` for `Boolean?` subjects (#178)
+
 ### Changed
+
+- _NullComparisonAssertion_ and _EqualityComparisonAssertion_ quick fixes now also apply when the assertion is `isEqualTo(true)` or `isEqualTo(false)`
 
 ### Deprecated
 

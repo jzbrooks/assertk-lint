@@ -9,6 +9,7 @@ class AssertkIssueRegistry : IssueRegistry() {
         listOf(
             AssertJDetector.ISSUE,
             AssertThatEqualsDetector.ISSUE,
+            BooleanExpressionSubjectDetector.BOOLEAN_EQUALITY_ISSUE,
             BooleanExpressionSubjectDetector.NULL_EXPR_ISSUE,
             BooleanExpressionSubjectDetector.EQUALITY_EXPR_ISSUE,
             CollectionAssertionDetector.SIZE_READ_ISSUE,

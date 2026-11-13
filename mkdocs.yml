@@ -94,6 +94,7 @@ nav:
       - KotlinAssertionUse: checks/kotlin-assertion.md
       - NullComparisonAssertion: checks/null-comparison.md
       - EqualityComparisonAssertion: checks/equality-comparison.md
+      - BooleanEqualityAssertion: checks/boolean-equality.md
       - CollectionSizeAssertion: checks/collection-size.md
       - UseIndexAssertion: checks/use-index.md
       - UseSingleAssertion: checks/use-single.md
