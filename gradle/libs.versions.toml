@@ -1,6 +1,6 @@
 [versions]
-agp = "9.5.2"
-androidLint = "32.5.2" # agp + 23.0.0
+agp = "9.5.3"
+androidLint = "32.5.3" # agp + 23.0.0
 changelog = "2.5.0"
 junit = "4.13.2"
 kotlin = "2.4.21"
